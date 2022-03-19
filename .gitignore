@@ -1,4 +1,6 @@
 # vi
 *.swp
 
+# python
 venv
+__pycache__
