@@ -4,14 +4,15 @@ import yaml
 CONFIG_FILE = "config.yaml"
 
 
-def load_config():
+def load_config(config_file):
     """Loads a YAML file.
 
     Raises:
         FileNotFoundError
+        IsADirectoryError
 
     Returns:
         dict
     """
-    with open(CONFIG_FILE, "r") as f:
+    with open(config_file, "r") as f:
         return yaml.safe_load(f)
