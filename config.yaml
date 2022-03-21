@@ -1,2 +1,2 @@
 # directory where database and logs are created
-output_dir: .
+output_dir: output/
