@@ -1,8 +1,9 @@
 from flask import Flask
 
+from server import bookmarks
+
 
 class App:
-
     def __init__(self):
         self.app = Flask(__name__)
 
