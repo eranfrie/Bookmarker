@@ -1,2 +1,5 @@
 # directory where database and logs are created
 output_dir: output/
+
+host: localhost
+port: 8000

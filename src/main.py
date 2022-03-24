@@ -1,6 +1,7 @@
 from pathlib import Path
 import logging
 
+from app.app import App
 import version
 import config
 import opts
@@ -34,6 +35,8 @@ def main():
     # init logger after create output dir
     log.init_logger(conf["output_dir"])
     logger = logging.getLogger()
+
+    App().run(conf["host"], conf["port"])
 
 
 if __name__ == "__main__":
