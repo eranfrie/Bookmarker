@@ -25,7 +25,9 @@ def init_logger(output_dir):
         maxBytes=50 * 1024 * 1024,  # 50 MB
         backupCount=3,
     )
-    file_formatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s] %(filename)s:%(lineno)d  %(message)s")
+    file_formatter = logging.Formatter(
+        "%(asctime)s [%(levelname)-5.5s] %(filename)s:%(lineno)d  %(message)s"
+    )
     file_handler.setFormatter(file_formatter)
     file_handler.setLevel(logging.DEBUG)
     root_logger.addHandler(file_handler)

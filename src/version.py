@@ -1,6 +1,6 @@
-import pathlib
-
 import git
+
+from utils import paths
 
 
 MAJOR = 0
@@ -13,8 +13,9 @@ def get_patch():
     If executed from the git repo, returns number of commits.
     Otherwise, returns "<NOT-GIT-REPO>".
     """
-    # path of this file (to allow running from outside of the git repo)
-    git_root_dir = pathlib.Path(__file__).parent.parent.resolve()
+    # use path of root dir instead of relative "."
+    # (to allow running from outside of the git repo)
+    git_root_dir = paths.get_project_root_dir()
 
     try:
         repo = git.Repo(git_root_dir)
