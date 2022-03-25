@@ -1,5 +1,6 @@
 from pathlib import Path
 import logging
+import sys
 
 from utils import config, log, opts, version
 from app.app import App
@@ -10,17 +11,17 @@ def main():
     if options.version:
         v = version.get_version()
         print(f"EasyBookmarks Version {v}")
-        exit(0)
+        sys.exit(0)
 
     config_file = config.CONFIG_FILE if not options.config else options.config
     try:
         conf = config.load_config(config_file)
     except FileNotFoundError:
         print(f"Config file {config_file} not found")
-        exit(1)
+        sys.exit(1)
     except IsADirectoryError:
         print(f"Failed to load config file {config_file} (it is a directory)")
-        exit(1)
+        sys.exit(1)
 
     # create output (and logs) dir (if doesn't already exist)
     logs_dir = Path(conf["output_dir"], log.LOGS_DIR)
@@ -33,6 +34,7 @@ def main():
     log.init_logger(conf["output_dir"])
     logger = logging.getLogger()
 
+    logger.info("start running")
     App().run(conf["host"], conf["port"])
 
 

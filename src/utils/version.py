@@ -21,7 +21,7 @@ def get_patch():
         repo = git.Repo(git_root_dir)
         num_commits = repo.git.rev_list('--count', 'HEAD')
         return num_commits
-    except git.exc.InvalidGitRepositoryError:
+    except git.InvalidGitRepositoryError:
         return "<NOT-GIT-REPO>"
 
 

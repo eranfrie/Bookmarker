@@ -1,21 +1,40 @@
-import pathlib
+from pathlib import Path
+import sys
 
 import pycodestyle
+import pylint.lint
 
 from src.utils import paths
 
 
 def main():
     exit_code = 0
-
     project_root_dir = paths.get_project_root_dir()
-    pep8_config_file = pathlib.Path(project_root_dir, "pep8.conf")
+
+    print("Running pycodestyle ...")
+    pep8_config_file = Path(project_root_dir, "pep8.conf")
     result = pycodestyle.StyleGuide(config_file=pep8_config_file) \
         .check_files([project_root_dir])
-    if result.total_errors > 0:
+    if result.total_errors == 0:
+        print("SUCCEEDED\n")
+    else:
+        print("FAILED\n")
         exit_code = 1
+    print("=" * 80, "\n")
 
-    exit(exit_code)
+    print("Running pylint ...")
+    src_dir = str(Path(project_root_dir, "src"))
+    disable = "--disable=" \
+        "too-few-public-methods," \
+        "unspecified-encoding," \
+        "missing-docstring," \
+        "invalid-name," \
+        "broad-except," \
+        "fixme"
+    # pylint doesn't return anything - just prints to screen
+    pylint.lint.Run([disable, src_dir], exit=False)
+
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":
