@@ -1,11 +1,8 @@
 from pathlib import Path
 import logging
 
+from utils import config, log, opts, version
 from app.app import App
-import version
-import config
-import opts
-import log
 
 
 def main():
