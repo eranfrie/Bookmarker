@@ -9,8 +9,8 @@ class Bookmark:
 def get_all_bookmarks():
     # TODO  hardcoded for now so we can work on the app
     bookmarks = [
-        Bookmark(1, "sport", "sport 5 channel", "www.sport5.co.il"),
-        Bookmark(2, "ynet", "news", "www.ynet.co.il"),
-        Bookmark(3, "gmail", "mails", "www.gmail.com"),
+        Bookmark(1, "sport", "sport 5 channel", "http://www.sport5.co.il"),
+        Bookmark(2, "ynet", "news", "http://www.ynet.co.il"),
+        Bookmark(3, "gmail", "mails", "http://www.gmail.com"),
     ]
     return bookmarks
