@@ -7,24 +7,30 @@ A productivity tool to manage and browse bookmarks.
 
 ##### Requirements:
 
-1. Python 3.7
+1. Python 3.7 or higher.
 
 ##### Linux / macOS:
 
-1. Install Python dependencies using `venv`:
-
+1. Create a directory named `venv`.
+2. Run:
 ```
-virtualenv -p python3.7 venv
-source venv/bin/activate
+python -m venv <route/to/venv-directory>
+source <route/to/venv-directory>/bin/activate
 pip install -r requirements.txt
 ```
-##### Windows: 
+
+##### Windows:
 
 1. Create a directory named `venv`.
-2. Run: 
-
+2. Run:
 ```
-python -m venv  <route\to\venv_directory>
-<route\to\venv_directory>\Scripts\activate.bat
+python -m venv  <route\to\venv-directory>
+<route\to\venv-directory>\Scripts\activate.bat
 pip install -r requirements.txt
 ```
+
+## Running the application
+
+1. Activate the virtual environment.
+2. Run `python src/main.py`.
+3. From the browser: `http://localhost:8000`.
