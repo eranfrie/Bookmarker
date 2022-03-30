@@ -31,6 +31,19 @@ pip install -r requirements.txt
 
 ## Running the application
 
-1. Activate the virtual environment.
+1. Activate the virtual environment: `source venv/bin/activate`.
 2. Run `python src/main.py`.
 3. From the browser: `http://localhost:8000`.
+
+## Tests
+
+Running the `build.py` script performs several static code analysis and test suites:
+- pycodestyle (pep8)
+- pylint
+- Unit tests
+- End-to-end tests
+
+To run:
+1. Activate the virtual environment: `source venv/bin/activate`.
+2. Install dev dependencies: `pip install -r requirements_dev.txt`.
+3. Run: `PYTHONPATH=src python build.py`.

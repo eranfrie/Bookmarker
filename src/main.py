@@ -8,7 +8,7 @@ from data.sqlite import Sqlite
 from server.bookmarks import Server
 
 
-def main():
+def main(override_config):
     options = opts.get_options()
     if options.version:
         v = version.get_version()
@@ -24,6 +24,9 @@ def main():
     except IsADirectoryError:
         print(f"Failed to load config file {config_file} (it is a directory)")
         sys.exit(1)
+    # override config
+    for k, v in override_config.items():
+        conf[k] = v
 
     # create output (and logs) dir (if doesn't already exist)
     output_dir = conf["output_dir"]
@@ -34,7 +37,7 @@ def main():
         print(f"Failed to create {logs_dir} directory {e}")
 
     # init logger after create output dir
-    log.init_logger(output_dir)
+    log.init_logger(output_dir, conf["console_log_level"])
     logger = logging.getLogger()
 
     logger.info("start running")
@@ -45,4 +48,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main({})

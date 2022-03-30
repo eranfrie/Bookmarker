@@ -3,6 +3,7 @@ import sys
 
 import pycodestyle
 import pylint.lint
+import pytest
 
 from src.utils import paths
 
@@ -31,8 +32,13 @@ def main():
         "invalid-name," \
         "broad-except," \
         "fixme"
+    ignore = "--ignore=test_e2e.py"
     # pylint doesn't return anything - just prints to screen
-    pylint.lint.Run([disable, src_dir], exit=False)
+    pylint.lint.Run([disable, ignore, src_dir], exit=False)
+
+    res = pytest.main()
+    if res != pytest.ExitCode.OK:
+        exit_code = 1
 
     sys.exit(exit_code)
 

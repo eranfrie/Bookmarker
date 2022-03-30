@@ -7,7 +7,7 @@ LOGS_DIR = "logs/"  # will be created in output dir
 LOG_FILENAME = "easybookmarks.log"
 
 
-def init_logger(output_dir):
+def init_logger(output_dir, console_log_level):
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)
 
@@ -15,7 +15,7 @@ def init_logger(output_dir):
     console_handler = logging.StreamHandler()
     console_formatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s")
     console_handler.setFormatter(console_formatter)
-    console_handler.setLevel(logging.INFO)
+    console_handler.setLevel(console_log_level)
     root_logger.addHandler(console_handler)
 
     # file

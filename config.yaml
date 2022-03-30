@@ -1,5 +1,7 @@
 # directory where database and logs are created
 output_dir: output/
 
+console_log_level: INFO
+
 host: localhost
 port: 8000
