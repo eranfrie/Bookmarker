@@ -4,6 +4,8 @@ import sys
 
 from utils import config, log, opts, version
 from app.app import App
+from data.sqlite import Sqlite
+from server.bookmarks import Server
 
 
 def main():
@@ -24,18 +26,22 @@ def main():
         sys.exit(1)
 
     # create output (and logs) dir (if doesn't already exist)
-    logs_dir = Path(conf["output_dir"], log.LOGS_DIR)
+    output_dir = conf["output_dir"]
+    logs_dir = Path(output_dir, log.LOGS_DIR)
     try:
         logs_dir.mkdir(parents=True, exist_ok=True)
     except Exception as e:
         print(f"Failed to create {logs_dir} directory {e}")
 
     # init logger after create output dir
-    log.init_logger(conf["output_dir"])
+    log.init_logger(output_dir)
     logger = logging.getLogger()
 
     logger.info("start running")
-    App().run(conf["host"], conf["port"])
+    db_filename = Path(output_dir, "bookmarks.db")
+    db = Sqlite(db_filename)
+    server = Server(db)
+    App(server).run(conf["host"], conf["port"])
 
 
 if __name__ == "__main__":

@@ -1,16 +1,29 @@
 class Bookmark:
-    def __init__(self, bookmark_id, title, description, link):
+    def __init__(self, bookmark_id, title, description, url):
         self.id = bookmark_id
         self.title = title
         self.description = description
-        self.link = link
+        self.url = url
 
 
-def get_all_bookmarks():
-    # TODO  hardcoded for now so we can work on the app
-    bookmarks = [
-        Bookmark(1, "sport", "sport 5 channel", "http://www.sport5.co.il"),
-        Bookmark(2, "ynet", "news", "http://www.ynet.co.il"),
-        Bookmark(3, "gmail", "mails", "http://www.gmail.com"),
-    ]
-    return bookmarks
+class Server:
+    def __init__(self, db):
+        self.db = db
+
+    def get_all_bookmarks(self):
+        """
+        Returns:
+            list of Bookmark objects
+        """
+        bookmarks = []
+        bookmarks_json = self.db.read_all_bookmarks()
+        for j in bookmarks_json:
+            bookmarks.append(
+                Bookmark(
+                    j["id"],
+                    j["title"],
+                    j["description"],
+                    j["url"],
+                )
+            )
+        return bookmarks
