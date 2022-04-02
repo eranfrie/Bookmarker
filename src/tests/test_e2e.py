@@ -11,6 +11,7 @@ URL = "http://localhost:8000"
 DB_FILENAME = "bookmarks.db"
 
 
+# pylint: disable=W0201, R0201
 class TestE2e:
     def setup(self):
         # delete old db
