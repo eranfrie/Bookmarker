@@ -73,3 +73,26 @@ class TestE2e:
         }
         response = requests.post(ADD_BOOKMARK_URL, data=payload)
         self._compare_num_bookmarks(response, 2)
+
+    def test_add_bookmark_with_missing_description(self):
+        """
+        description is optional field - adding a bookmark should succeed.
+        """
+        payload = {
+            "title": "test_title",
+            "url": "http://www.test.com",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 1)
+
+    def test_not_desplaying_none_description(self):
+        """
+        a missing (optional) description should not be displayed as "None".
+        """
+        payload = {
+            "title": "test_title",
+            "url": "http://www.test.com",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 1)
+        assert "None" not in response.text

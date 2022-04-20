@@ -27,8 +27,11 @@ class App:
 
             all_bookmarks = self.server.get_all_bookmarks()
             for b in all_bookmarks:
-                html += f"<b>{b.title}:</b> {b.description} " \
-                    f"<a href={b.url} target=\"_blank\">{b.url}</a><br>"
+                html += f"<b>{b.title}:</b> "
+                # description is optional
+                if b.description:
+                    html += f"{b.description} "
+                html += f"<a href={b.url} target=\"_blank\">{b.url}</a><br>"
 
             return html
 

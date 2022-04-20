@@ -37,6 +37,8 @@ class Sqlite:
 
     def read_all_bookmarks(self):
         """
+        description (optional field) should be None if missing from the db.
+
         Returns:
             list of dict (each dict is a record from the db)
         """
@@ -44,11 +46,17 @@ class Sqlite:
         bookmarks = []
         records = cursor.execute(f"SELECT * FROM {BOOKMARKS_TABLE};")
         for record in records:
+            # check if description is not empty and not None
+            # (in sqlite, missing field is returned as "None" string)
+            description = None
+            if record[2] and record[2] != "None":
+                description = record[2]
+
             bookmarks.append(
                 {
                     "id": record[0],
                     "title": record[1],
-                    "description": record[2],
+                    "description": description,
                     "url": record[3],
                 }
             )
