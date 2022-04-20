@@ -27,3 +27,6 @@ class Server:
                 )
             )
         return bookmarks
+
+    def add_bookmark(self, title, description, url):
+        self.db.add_bookmark(title, description, url)

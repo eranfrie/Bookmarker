@@ -7,8 +7,10 @@ import requests
 from main import main
 
 
-URL = "http://localhost:8000"
 DB_FILENAME = "bookmarks.db"
+
+URL = "http://localhost:8000"
+ADD_BOOKMARK_URL = f"{URL}/add_bookmark"
 
 
 # pylint: disable=W0201, R0201
@@ -52,3 +54,22 @@ class TestE2e:
     def test_empty_get(self):
         response = requests.get(URL)
         self._compare_num_bookmarks(response, 0)
+
+    def test_add_bookmark(self):
+        # add a bookmark
+        payload = {
+            "title": "test_title",
+            "description": "test_description",
+            "url": "http://www.test.com",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 1)
+
+        # add another bookmark
+        payload = {
+            "title": "test_title_2",
+            "description": "test_description_2",
+            "url": "http://www.test_2.com",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 2)
