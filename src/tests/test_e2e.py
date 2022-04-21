@@ -1,6 +1,7 @@
 from multiprocessing import Process
 from time import sleep
 from pathlib import Path
+import re
 
 import requests
 
@@ -30,7 +31,7 @@ class TestE2e:
         self.server = Process(target=main, args=(override_config,))
         self.server.start()
         # wait for server to start
-        for _ in range(3):
+        for _ in range(120):
             try:
                 r = requests.get("http://localhost:8000")
                 if r.status_code == 200:
@@ -38,7 +39,7 @@ class TestE2e:
             except requests.exceptions.ConnectionError:
                 pass
 
-            sleep(2)
+            sleep(0.05)
 
         self.teardown()
         raise Exception("Server failed to start")
@@ -107,6 +108,11 @@ class TestE2e:
         response = requests.post(ADD_BOOKMARK_URL, data=payload)
         self._compare_num_bookmarks(response, 2)
 
+        # validate fields order
+        pattern = "test_title.*test_description.*http://www\\.test\\.com.*" \
+                  "test_title_2.*test_description_2.*http://www\\.test_2\\.com"
+        assert re.search(pattern, response.text)
+
     def test_add_bookmark_with_missing_description(self):
         """
         description is optional field - adding a bookmark should succeed.
@@ -142,6 +148,11 @@ class TestE2e:
         response = requests.post(ADD_BOOKMARK_URL, data=payload)
         self._compare_num_bookmarks(response, 0, check_total=False)
         assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 1
+        assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
+
+        response = requests.get(URL)
+        self._compare_num_bookmarks(response, 0, check_total=False)
+        assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 0
         assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
 
     def test_add_bookmark_success_msg(self):
