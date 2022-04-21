@@ -47,9 +47,11 @@ class TestE2e:
         self.server.terminate()
         self.server.join()
 
-    def _compare_num_bookmarks(self, response, expected_num_bookmarks):
+    def _compare_num_bookmarks(self, response, expected_num_bookmarks, check_total=True):
         assert response.status_code == 200
         assert response.text.count("href") == expected_num_bookmarks
+        if check_total:
+            assert f"Total: {expected_num_bookmarks}" in response.text
 
     def _add_bookmark_to_db(self, title, description, url):
         db_filename = Path(OUTPUT_DIR, DB_FILENAME)
@@ -83,7 +85,7 @@ class TestE2e:
         self._delete_db()
 
         response = requests.get(URL)
-        self._compare_num_bookmarks(response, 0)
+        self._compare_num_bookmarks(response, 0, check_total=False)
         assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
 
     def test_add_bookmark(self):
@@ -138,7 +140,7 @@ class TestE2e:
             "url": "http://www.test.com",
         }
         response = requests.post(ADD_BOOKMARK_URL, data=payload)
-        self._compare_num_bookmarks(response, 0)
+        self._compare_num_bookmarks(response, 0, check_total=False)
         assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 1
         assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
 

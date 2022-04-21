@@ -35,6 +35,9 @@ class App:
 
             try:
                 all_bookmarks = self.server.get_all_bookmarks()
+                total_bookmarks = len(all_bookmarks)
+                html += f"Total: {total_bookmarks}<br><br>"
+
                 for b in all_bookmarks:
                     html += f"<b>{b.title}:</b> "
                     # description is optional
