@@ -10,6 +10,8 @@ logger = logging.getLogger()
 GET_BOOKMARKS_ERR_MSG = "Internal error: failed to read bookmarks. please try again later"
 ADD_BOOKMARK_ERR_MSG = "Internal error: failed to add a new bookmark. please try again later"
 ADD_BOOKMARK_OK_MSG = "Bookmark added successfully"
+ADD_BOOKMARK_TITLE_REQUIRED_MSG = "Title is a required field"
+ADD_BOOKMARK_URL_REQUIRED_MSG = "URL is a required field"
 
 
 class App:
@@ -56,8 +58,14 @@ class App:
         @self.app.route('/add_bookmark', methods=["POST"])
         def add_bookmark():
             title = request.form.get("title")
+            if not title:
+                add_bookmark_msg = f'<p style="color:red">{ADD_BOOKMARK_TITLE_REQUIRED_MSG}</p>'
+                return main_page_html(add_bookmark_msg=add_bookmark_msg)
             description = request.form.get("description")
             url = request.form.get("url")
+            if not url:
+                add_bookmark_msg = f'<p style="color:red">{ADD_BOOKMARK_URL_REQUIRED_MSG}</p>'
+                return main_page_html(add_bookmark_msg=add_bookmark_msg)
             logger.info("got request to add bookmark: title=%s, desc=%s, url=%s",
                         title, description, url)
 

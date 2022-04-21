@@ -172,3 +172,21 @@ class TestE2e:
         response = requests.get(URL)
         self._compare_num_bookmarks(response, 2)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 0
+
+    def test_add_bookmark_title_required(self):
+        payload = {
+            "description": "test_description",
+            "url": "http://www.test.com",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 0)
+        assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
+
+    def test_add_bookmark_url_required(self):
+        payload = {
+            "title": "test_title_2",
+            "description": "test_description",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 0)
+        assert response.text.count(app.ADD_BOOKMARK_URL_REQUIRED_MSG) == 1
