@@ -2,6 +2,8 @@ import logging
 
 from flask import Flask, request
 
+from server.server_api import InternalException
+
 
 logger = logging.getLogger()
 
@@ -11,12 +13,14 @@ class App:
         self.server = server
         self.app = Flask(__name__)
 
-        def main_page_html():
+        def main_page_html(add_bookmark_err=None):
             html = "<h1>EasyBookmarks</h1>"
 
             # add bookmark form
-            html += '<h4>Add a new bookmark</h4>' \
-                '<form action="/add_bookmark" method="post">' \
+            html += '<h4>Add a new bookmark</h4>'
+            if add_bookmark_err:
+                html += f'<p style="color:red">{add_bookmark_err}</p>'
+            html += '<form action="/add_bookmark" method="post">' \
                     '<input type="text" name="title" required=true placeholder="Title"><br>' \
                     '<input type="text" name="description" placeholder="Description (optional)">' \
                     '<br>' \
@@ -46,8 +50,14 @@ class App:
             url = request.form.get("url")
             logger.info("got request to add bookmark: title=%s, desc=%s, url=%s",
                         title, description, url)
-            self.server.add_bookmark(title, description, url)
-            return main_page_html()
+
+            add_bookmark_err = None
+            try:
+                self.server.add_bookmark(title, description, url)
+            except InternalException:
+                add_bookmark_err = "Internal error: failed to add a new bookmark. please try again later"
+
+            return main_page_html(add_bookmark_err=add_bookmark_err)
 
     def run(self, host, port):
         self.app.run(host=host, port=port)

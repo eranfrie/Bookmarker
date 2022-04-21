@@ -65,6 +65,8 @@ class Sqlite:
 
     def add_bookmark(self, title, description, url):
         conn, cursor = self._connect()
-        cursor.execute(f"INSERT INTO {BOOKMARKS_TABLE} (title, description, url) "
-                       f"VALUES ('{title}', '{description}', '{url}');")
-        Sqlite._close(conn)
+        try:
+            cursor.execute(f"INSERT INTO {BOOKMARKS_TABLE} (title, description, url) "
+                           f"VALUES ('{title}', '{description}', '{url}');")
+        finally:
+            Sqlite._close(conn)
