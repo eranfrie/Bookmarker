@@ -141,3 +141,32 @@ class TestE2e:
         self._compare_num_bookmarks(response, 0)
         assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 1
         assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
+
+    def test_add_bookmark_success_msg(self):
+        # add a bookmark
+        payload = {
+            "title": "test_title",
+            "description": "test_description",
+            "url": "http://www.test.com",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 1)
+        assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
+
+        response = requests.get(URL)
+        self._compare_num_bookmarks(response, 1)
+        assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 0
+
+        # add another bookmark
+        payload = {
+            "title": "test_title_2",
+            "description": "test_description_2",
+            "url": "http://www.test_2.com",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 2)
+        assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
+
+        response = requests.get(URL)
+        self._compare_num_bookmarks(response, 2)
+        assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 0

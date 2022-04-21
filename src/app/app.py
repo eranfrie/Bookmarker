@@ -9,6 +9,7 @@ logger = logging.getLogger()
 
 GET_BOOKMARKS_ERR_MSG = "Internal error: failed to read bookmarks. please try again later"
 ADD_BOOKMARK_ERR_MSG = "Internal error: failed to add a new bookmark. please try again later"
+ADD_BOOKMARK_OK_MSG = "Bookmark added successfully"
 
 
 class App:
@@ -16,13 +17,13 @@ class App:
         self.server = server
         self.app = Flask(__name__)
 
-        def main_page_html(add_bookmark_err=None):
+        def main_page_html(add_bookmark_msg=None):
             html = "<h1>EasyBookmarks</h1>"
 
             # add bookmark form
             html += '<h4>Add a new bookmark</h4>'
-            if add_bookmark_err:
-                html += f'<p style="color:red">{add_bookmark_err}</p>'
+            if add_bookmark_msg:
+                html += f'{add_bookmark_msg}'
             html += '<form action="/add_bookmark" method="post">' \
                     '<input type="text" name="title" required=true placeholder="Title"><br>' \
                     '<input type="text" name="description" placeholder="Description (optional)">' \
@@ -57,13 +58,13 @@ class App:
             logger.info("got request to add bookmark: title=%s, desc=%s, url=%s",
                         title, description, url)
 
-            add_bookmark_err = None
             try:
                 self.server.add_bookmark(title, description, url)
+                add_bookmark_msg = f'<p style="color:green">{ADD_BOOKMARK_OK_MSG}</p>'
             except InternalException:
-                add_bookmark_err = ADD_BOOKMARK_ERR_MSG
+                add_bookmark_msg = f'<p style="color:red">{ADD_BOOKMARK_ERR_MSG}</p>'
 
-            return main_page_html(add_bookmark_err=add_bookmark_err)
+            return main_page_html(add_bookmark_msg=add_bookmark_msg)
 
     def run(self, host, port):
         self.app.run(host=host, port=port)
