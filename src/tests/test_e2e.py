@@ -5,8 +5,10 @@ from pathlib import Path
 import requests
 
 from main import main
+from data.sqlite import Sqlite
 
 
+OUTPUT_DIR = "tmp"
 DB_FILENAME = "bookmarks.db"
 
 URL = "http://localhost:8000"
@@ -24,7 +26,7 @@ class TestE2e:
 
         # start the server
         override_config = {
-            "output_dir": "tmp",
+            "output_dir": OUTPUT_DIR,
             "console_log_level": "WARNING",
         }
         self.server = Process(target=main, args=(override_config,))
@@ -54,6 +56,23 @@ class TestE2e:
     def test_empty_get(self):
         response = requests.get(URL)
         self._compare_num_bookmarks(response, 0)
+
+    def _add_bookmark_to_db(self, title, description, url):
+        db_filename = Path(OUTPUT_DIR, DB_FILENAME)
+        db = Sqlite(db_filename)
+        db.add_bookmark(title, description, url)
+
+    def test_get_bookmarks(self):
+        response = requests.get(URL)
+        self._compare_num_bookmarks(response, 0)
+
+        self._add_bookmark_to_db("test_title_1", "test_description_1", "http://www.test_1.com")
+        response = requests.get(URL)
+        self._compare_num_bookmarks(response, 1)
+
+        self._add_bookmark_to_db("test_title_2", "test_description_2", "http://www.test_2.com")
+        response = requests.get(URL)
+        self._compare_num_bookmarks(response, 2)
 
     def test_add_bookmark(self):
         # add a bookmark
@@ -85,7 +104,7 @@ class TestE2e:
         response = requests.post(ADD_BOOKMARK_URL, data=payload)
         self._compare_num_bookmarks(response, 1)
 
-    def test_not_desplaying_none_description(self):
+    def test_not_desplaying_missing_description(self):
         """
         a missing (optional) description should not be displayed as "None".
         """
