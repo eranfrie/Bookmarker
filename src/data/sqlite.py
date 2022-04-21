@@ -44,7 +44,13 @@ class Sqlite:
         """
         conn, cursor = self._connect()
         bookmarks = []
-        records = cursor.execute(f"SELECT * FROM {BOOKMARKS_TABLE};")
+
+        try:
+            records = cursor.execute(f"SELECT * FROM {BOOKMARKS_TABLE};")
+        except Exception as e:
+            Sqlite._close(conn)
+            raise e
+
         for record in records:
             # check if description is not empty and not None
             # (in sqlite, missing field is returned as "None" string)

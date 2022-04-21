@@ -24,7 +24,13 @@ class Server:
             list of Bookmark objects
         """
         bookmarks = []
-        bookmarks_json = self.db.read_all_bookmarks()
+
+        try:
+            bookmarks_json = self.db.read_all_bookmarks()
+        except Exception as e:
+            logger.exception("failed to read bookmarks from db")
+            raise InternalException() from e
+
         for j in bookmarks_json:
             bookmarks.append(
                 Bookmark(
@@ -40,6 +46,6 @@ class Server:
         try:
             self.db.add_bookmark(title, description, url)
         except Exception as e:
-            logger.exception("failed to add bookmark: title=%s, description=%s, url=%s",
-                title, description, url)
-            raise InternalException()
+            logger.exception("failed to add bookmark to db: title=%s, description=%s, url=%s",
+                             title, description, url)
+            raise InternalException() from e

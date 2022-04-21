@@ -7,6 +7,9 @@ from server.server_api import InternalException
 
 logger = logging.getLogger()
 
+GET_BOOKMARKS_ERR_MSG = "Internal error: failed to read bookmarks. please try again later"
+ADD_BOOKMARK_ERR_MSG = "Internal error: failed to add a new bookmark. please try again later"
+
 
 class App:
     def __init__(self, server):
@@ -29,13 +32,16 @@ class App:
                 '</form>' \
                 "<hr>"
 
-            all_bookmarks = self.server.get_all_bookmarks()
-            for b in all_bookmarks:
-                html += f"<b>{b.title}:</b> "
-                # description is optional
-                if b.description:
-                    html += f"{b.description} "
-                html += f"<a href={b.url} target=\"_blank\">{b.url}</a><br>"
+            try:
+                all_bookmarks = self.server.get_all_bookmarks()
+                for b in all_bookmarks:
+                    html += f"<b>{b.title}:</b> "
+                    # description is optional
+                    if b.description:
+                        html += f"{b.description} "
+                    html += f"<a href={b.url} target=\"_blank\">{b.url}</a><br>"
+            except InternalException:
+                html += f'<p style="color:red">{GET_BOOKMARKS_ERR_MSG}</p>'
 
             return html
 
@@ -55,7 +61,7 @@ class App:
             try:
                 self.server.add_bookmark(title, description, url)
             except InternalException:
-                add_bookmark_err = "Internal error: failed to add a new bookmark. please try again later"
+                add_bookmark_err = ADD_BOOKMARK_ERR_MSG
 
             return main_page_html(add_bookmark_err=add_bookmark_err)
 
