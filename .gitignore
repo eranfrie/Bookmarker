@@ -1,6 +1,6 @@
 # default output dir
 output/
-
+# e2e tests output dir
 tmp/
 
 # vi
@@ -9,3 +9,4 @@ tmp/
 # python
 venv
 __pycache__
+.coverage
