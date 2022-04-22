@@ -7,6 +7,12 @@ logger = logging.getLogger()
 BOOKMARKS_TABLE = "bookmarks"
 
 
+def sql_escape(text):
+    if not text:
+        return text
+    return text.replace("'", "''")
+
+
 class Sqlite:
     def __init__(self, db_filename):
         self.db_filename = db_filename
@@ -73,6 +79,8 @@ class Sqlite:
         conn, cursor = self._connect()
         try:
             cursor.execute(f"INSERT INTO {BOOKMARKS_TABLE} (title, description, url) "
-                           f"VALUES ('{title}', '{description}', '{url}');")
+                           f"VALUES ('{sql_escape(title)}', "
+                           f"'{sql_escape(description)}', "
+                           f"'{sql_escape(url)}');")
         finally:
             Sqlite._close(conn)
