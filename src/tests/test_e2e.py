@@ -6,6 +6,7 @@ import re
 import requests
 
 from main import main
+from data import sqlite
 from data.sqlite import Sqlite
 from app import app
 
@@ -48,16 +49,26 @@ class TestE2e:
         self.server.terminate()
         self.server.join()
 
-    def _compare_num_bookmarks(self, response, expected_num_bookmarks, check_total=True):
+    def _compare_num_bookmarks(self, response, expected_num_bookmarks, db_avail=True):
         assert response.status_code == 200
         assert response.text.count("href") == expected_num_bookmarks
-        if check_total:
+        if db_avail:
             assert f"Total: {expected_num_bookmarks}" in response.text
+            assert self._count_bookmarks_in_db() == expected_num_bookmarks
 
     def _add_bookmark_to_db(self, title, description, url):
         db_filename = Path(OUTPUT_DIR, DB_FILENAME)
         db = Sqlite(db_filename)
         db.add_bookmark(title, description, url)
+
+    def _count_bookmarks_in_db(self):
+        db_filename = Path(OUTPUT_DIR, DB_FILENAME)
+        db = Sqlite(db_filename)
+        conn, cursor = db._connect()  # pylint: disable=W0212
+        res = cursor.execute(f"SELECT COUNT() FROM {sqlite.BOOKMARKS_TABLE};")
+        res = res.fetchone()[0]
+        Sqlite._close(conn)  # pylint: disable=W0212
+        return res
 
     def _delete_db(self):
         try:
@@ -86,7 +97,7 @@ class TestE2e:
         self._delete_db()
 
         response = requests.get(URL)
-        self._compare_num_bookmarks(response, 0, check_total=False)
+        self._compare_num_bookmarks(response, 0, db_avail=False)
         assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
 
     def test_add_bookmark(self):
@@ -146,12 +157,12 @@ class TestE2e:
             "url": "http://www.test.com",
         }
         response = requests.post(ADD_BOOKMARK_URL, data=payload)
-        self._compare_num_bookmarks(response, 0, check_total=False)
+        self._compare_num_bookmarks(response, 0, db_avail=False)
         assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 1
         assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
 
         response = requests.get(URL)
-        self._compare_num_bookmarks(response, 0, check_total=False)
+        self._compare_num_bookmarks(response, 0, db_avail=False)
         assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 0
         assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
 
