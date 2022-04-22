@@ -1,5 +1,7 @@
 import logging
 
+from flask import escape
+
 from server.server_api import InternalException
 
 
@@ -12,6 +14,12 @@ class Bookmark:
         self.title = title
         self.description = description
         self.url = url
+
+
+def html_escape(text):
+    if not text:
+        return text
+    return escape(text)
 
 
 class Server:
@@ -35,9 +43,9 @@ class Server:
             bookmarks.append(
                 Bookmark(
                     j["id"],
-                    j["title"],
-                    j["description"],
-                    j["url"],
+                    html_escape(j["title"]),
+                    html_escape(j["description"]),
+                    html_escape(j["url"]),
                 )
             )
         return bookmarks

@@ -201,3 +201,15 @@ class TestE2e:
         response = requests.post(ADD_BOOKMARK_URL, data=payload)
         self._compare_num_bookmarks(response, 0)
         assert response.text.count(app.ADD_BOOKMARK_URL_REQUIRED_MSG) == 1
+
+    def test_html_escape(self):
+        payload = {
+            "title": "<>test_title",
+            "description": "<>test_description",
+            "url": "<>http://www.test.com",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 1)
+        assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
+        pattern = "&lt;&gt;test_title.*&lt;&gt;test_description.*&lt;&gt;http://www\\.test\\.com"
+        assert re.search(pattern, response.text)
