@@ -234,3 +234,16 @@ class TestE2e:
         response = requests.post(ADD_BOOKMARK_URL, data=payload)
         self._compare_num_bookmarks(response, 2)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
+
+    def test_whitespace(self):
+        payload = {
+            "title": "test title",
+            "description": "test description",
+            "url": "test url",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 1)
+        assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
+        assert "test title" in response.text \
+            and "test description" in response.text \
+            and "test url" in response.text
