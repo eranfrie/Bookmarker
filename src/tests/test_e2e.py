@@ -258,3 +258,66 @@ class TestE2e:
         assert "test title" in response.text \
             and "test description" in response.text \
             and "test url" in response.text
+
+    def test_input_values_on_err(self):
+        """
+        If "add bookmark" operation fail,
+        fields that were entered by user should still show up.
+        """
+        # error due to missing title
+        payload = {
+            "description": "test_description",
+            "url": "test_url",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 0)
+        assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
+        assert 'value="test_description"' in response.text \
+            and 'value="test_url"' in response.text
+
+        # error due to missing url
+        payload = {
+            "title": "test_title",
+            "description": "test_description",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 0)
+        assert response.text.count(app.ADD_BOOKMARK_URL_REQUIRED_MSG) == 1
+        assert 'value="test_description"' in response.text \
+            and 'value="test_title"' in response.text
+
+        # internal error
+        self._delete_db()
+        payload = {
+            "title": "test_title",
+            "description": "test_description",
+            "url": "test_url",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 0, db_avail=False)
+        assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 1
+        assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
+        assert 'value="test_description"' in response.text \
+            and 'value="test_title"' in response.text \
+            and 'value="test_url"' in response.text
+
+    def test_escaped_input_values_on_err(self):
+        """
+        If "add bookmark" operation fail,
+        fields that were entered by user should still show up.
+
+        test that the values are escaped.
+        """
+        self._delete_db()
+        payload = {
+            "title": "<test_title>",
+            "description": "<test_description>",
+            "url": "<test_url>",
+        }
+        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        self._compare_num_bookmarks(response, 0, db_avail=False)
+        assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 1
+        assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
+        assert 'value="&lt;test_description&gt;"' in response.text \
+            and 'value="&lt;test_title&gt;"' in response.text \
+            and 'value="&lt;test_url&gt;"' in response.text

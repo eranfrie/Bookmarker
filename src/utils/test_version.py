@@ -1,6 +1,7 @@
 from utils import version
 
 
+# pylint: disable=R0201
 class TestVersion:
     def test_version(self):
         # just run it and check it has value

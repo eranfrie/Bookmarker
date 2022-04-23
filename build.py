@@ -31,7 +31,8 @@ def main():
         "too-few-public-methods," \
         "missing-docstring," \
         "invalid-name," \
-        "fixme"
+        "fixme," \
+        "line-too-long"  # we get it from pycodestyle
     # pylint doesn't return anything - just prints to screen
     pylint.lint.Run([disable, src_dir], exit=False)
 
