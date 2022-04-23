@@ -2,9 +2,11 @@ import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+from utils import opts
+
 
 LOGS_DIR = "logs/"  # will be created in output dir
-LOG_FILENAME = "easybookmarks.log"
+LOG_FILENAME = f"{opts.PROD_NAME.lower()}.log"
 
 
 def init_logger(output_dir, console_log_level):

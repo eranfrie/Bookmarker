@@ -12,7 +12,7 @@ def main(override_config):
     options = opts.get_options()
     if options.version:
         v = version.get_version()
-        print(f"EasyBookmarks Version {v}")
+        print(f"{opts.PROD_NAME} Version {v}")
         sys.exit(0)
 
     config_file = config.CONFIG_FILE if not options.config else options.config

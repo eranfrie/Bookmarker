@@ -2,6 +2,7 @@ import logging
 
 from flask import Flask, request
 
+from utils import opts
 from server.server_api import InternalException
 from server.bookmarks import html_escape
 
@@ -42,7 +43,7 @@ class App:
                 add_description_val="",
                 add_url_val=""):
             # header
-            html = '<h1 style="text-align:center">EasyBookmarks</h1>'
+            html = f'<h1 style="text-align:center">{opts.PROD_NAME}</h1>'
 
             # add bookmark form
             html += _add_bookmark_form(

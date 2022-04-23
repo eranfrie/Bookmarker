@@ -1,4 +1,4 @@
-# EasyBookmarks
+# Bookmarker
 
 A productivity tool to manage and browse bookmarks.
 
