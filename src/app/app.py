@@ -7,13 +7,13 @@ from server.server_api import InternalException
 from server.bookmarks import html_escape
 
 
-logger = logging.getLogger()
-
 GET_BOOKMARKS_ERR_MSG = "Internal error: failed to read bookmarks. Please try again later"
 ADD_BOOKMARK_ERR_MSG = "Internal error: failed to add a new bookmark. Please try again later"
 ADD_BOOKMARK_OK_MSG = "Bookmark added successfully"
 ADD_BOOKMARK_TITLE_REQUIRED_MSG = "Error: Title is a required field"
 ADD_BOOKMARK_URL_REQUIRED_MSG = "Error: URL is a required field"
+
+logger = logging.getLogger()
 
 
 class App:

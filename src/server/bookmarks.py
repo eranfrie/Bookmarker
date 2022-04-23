@@ -53,6 +53,7 @@ class Server:
     def add_bookmark(self, title, description, url):
         try:
             self.db.add_bookmark(title, description, url)
+            logger.info("bookmark added successfully")
         except Exception as e:
             logger.exception("failed to add bookmark to db: title=%s, description=%s, url=%s",
                              title, description, url)
