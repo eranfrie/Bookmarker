@@ -26,15 +26,10 @@ def main():
 
     # pylint
     print("Running pylint ...")
+    rc_file = str(Path(project_root_dir, ".pylintrc"))
     src_dir = str(Path(project_root_dir, "src"))
-    disable = "--disable=" \
-        "too-few-public-methods," \
-        "missing-docstring," \
-        "invalid-name," \
-        "fixme," \
-        "line-too-long"  # we get it from pycodestyle
     # pylint doesn't return anything - just prints to screen
-    pylint.lint.Run([disable, src_dir], exit=False)
+    pylint.lint.Run(["--rcfile=" + rc_file, src_dir], exit=False)
 
     # pytest
     res = pytest.main()
