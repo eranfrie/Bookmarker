@@ -3,7 +3,7 @@ import re
 import requests
 
 from app import app
-from src.tests.test_e2e_base import TestE2eBase
+from tests.test_e2e_base import TestE2eBase
 
 
 URL = "http://localhost:8000"

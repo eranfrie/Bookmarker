@@ -4,6 +4,7 @@ import sys
 
 from utils import config, log, opts, version
 from app.app import App
+from app.app_api import AppAPI
 from data.sqlite import Sqlite
 from server.bookmarks import Server
 
@@ -45,7 +46,8 @@ def main(override_config):
     db_filename = Path(output_dir, "bookmarks.db")
     db = Sqlite(db_filename)
     server = Server(db)
-    App(server).run(conf["host"], conf["port"])
+    app = App(server)
+    AppAPI(app).run(conf["host"], conf["port"])  # blocking
 
 
 if __name__ == "__main__":

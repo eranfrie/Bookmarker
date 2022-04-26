@@ -1,14 +1,11 @@
 import logging
 
-from flask import Flask, request
-
-from utils import opts
 from server.server_api import InternalException
 from server.bookmarks import html_escape
 
 
-GET_BOOKMARKS_ERR_MSG = "Internal error: failed to read bookmarks. Please try again later"
-ADD_BOOKMARK_ERR_MSG = "Internal error: failed to add a new bookmark. Please try again later"
+GET_BOOKMARKS_ERR_MSG = "Internal error. Please try again later"
+ADD_BOOKMARK_ERR_MSG = "Internal error: Failed to add a new bookmark. Please try again later"
 ADD_BOOKMARK_OK_MSG = "Bookmark added successfully"
 ADD_BOOKMARK_TITLE_REQUIRED_MSG = "Error: Title is a required field"
 ADD_BOOKMARK_URL_REQUIRED_MSG = "Error: URL is a required field"
@@ -19,85 +16,84 @@ logger = logging.getLogger()
 class App:
     def __init__(self, server):
         self.server = server
-        self.app = Flask(__name__)
 
-        def _add_bookmark_form(add_bookmark_msg, add_title_val, add_description_val, add_url_val):
-            html = '<h4>Add a new bookmark</h4>'
-            if add_bookmark_msg:
-                html += f'{add_bookmark_msg}'
-            html += f'<form action="/add_bookmark" method="post">' \
-                    f'<input type="text" name="title" required=true placeholder="* Title" ' \
-                    f'size="50" value="{html_escape(add_title_val)}"><br>' \
-                    f'<input type="text" name="description" placeholder="Description" ' \
-                    f'size="50" value="{html_escape(add_description_val)}"><br>' \
-                    f'<input type="text" name="url" required=true placeholder="* URL" ' \
-                    f'size="50" value="{html_escape(add_url_val)}"><br>' \
-                    f'<input type="submit">' \
-                f'</form>' \
-                f"<hr>"
-            return html
+    def _main_page(
+            self,
+            add_bookmark_succeeded,
+            add_bookmark_msg,
+            add_title_val,
+            add_description_val,
+            add_url_val):
+        """Returns all information to be displayed in the main page.
 
-        def _main_page_html(
-                add_bookmark_msg=None,
-                add_title_val="",
-                add_description_val="",
-                add_url_val=""):
-            # header
-            html = f'<h1 style="text-align:center">{opts.PROD_NAME}</h1>'
+        Args:
+            add_bookmark_succeeded (bool):
+                True/False if adding a bookmark is being requested and succeeded/failed accordingly.
+                None if adding a bookmark is not being requested.
+            add_bookmark_msg (str | None):
+                if add_bookmark_succeeded is True/False, a message to display.
+            add_title_val (str | ""): title to be displayed in the "add bookmark" inut field.
+                empty string ("") to display the placeholder.
+            add_description_val (str | ""): description to be displayed in the "add bookmark" inut field.
+                empty string ("") to display the placeholder.
+            add_url_val (str | ""): URL to be displayed in the "add bookmark" inut field.
+                empty string ("") to display the placeholder.
 
-            # add bookmark form
-            html += _add_bookmark_form(
-                add_bookmark_msg, add_title_val, add_description_val, add_url_val)
+        Returns:
+            returns the parameters as is
+            bookmarks (list(Bookmark) | None):
+                list of bookmarks to be display.
+                None if error occured.
+            get_bookmarks_err (str): message to be displayed in case of error
+                when trying to fetch the bookmarks.
+        """
+        # bookmarks section
+        bookmarks = None
+        get_bookmarks_err = None
+        try:
+            bookmarks = self.server.get_all_bookmarks()
+        except InternalException:
+            get_bookmarks_err = GET_BOOKMARKS_ERR_MSG
 
-            # display bookmarks
-            try:
-                all_bookmarks = self.server.get_all_bookmarks()
-                total_bookmarks = len(all_bookmarks)
-                html += f"Total: {total_bookmarks}<br><br>"
+        return \
+            add_bookmark_succeeded, \
+            add_bookmark_msg, \
+            html_escape(add_title_val), \
+            html_escape(add_description_val), \
+            html_escape(add_url_val), \
+            bookmarks, \
+            get_bookmarks_err
 
-                for b in all_bookmarks:
-                    html += f"<b>{b.title}:</b> "
-                    # description is optional
-                    if b.description:
-                        html += f"{b.description} "
-                    html += f"<a href={b.url} target=\"_blank\">{b.url}</a><br>"
-            except InternalException:
-                html += f'<div style="color:red">{GET_BOOKMARKS_ERR_MSG}</div>'
+    def get_bookmarks(self):
+        """
+        Returns all information needed to display the main page
+        (see `_main_page` function).
+        """
+        return self._main_page(None, None, "", "", "")
 
-            return html
+    def add_bookmark(self, title, description, url):
+        """
+        Returns all information needed to display the main page
+        (see `_main_page` function).
+        """
+        logger.info("got request to add bookmark: title=%s, desc=%s, url=%s",
+                    title, description, url)
 
-        @self.app.route('/')
-        def index():
-            return _main_page_html()
+        # input validation
+        # not expected to happen because browser enforces it (using HTML 'required' attribute)
+        if not title or not url:
+            add_bookmark_msg = ADD_BOOKMARK_TITLE_REQUIRED_MSG if not title \
+                    else ADD_BOOKMARK_URL_REQUIRED_MSG
+            return self._main_page(
+                    False, add_bookmark_msg,
+                    title, description, url)
 
-        @self.app.route('/add_bookmark', methods=["POST"])
-        def add_bookmark():
-            title = request.form.get("title")
-            description = request.form.get("description")
-            url = request.form.get("url")
-
-            # input validation
-            # not expected to happen because browser enforces it (using HTML 'required' attribute)
-            if not title or not url:
-                add_bookmark_msg = f'<div style="color:red">{ADD_BOOKMARK_TITLE_REQUIRED_MSG}</div>' \
-                    if not title else f'<div style="color:red">{ADD_BOOKMARK_URL_REQUIRED_MSG}</div>'
-                return _main_page_html(add_bookmark_msg=add_bookmark_msg,
-                                       add_title_val=title,
-                                       add_description_val=description,
-                                       add_url_val=url)
-
-            logger.info("got request to add bookmark: title=%s, desc=%s, url=%s",
-                        title, description, url)
-            try:
-                self.server.add_bookmark(title, description, url)
-                add_bookmark_msg = f'<div style="color:green">{ADD_BOOKMARK_OK_MSG}</div>'
-                return _main_page_html(add_bookmark_msg=add_bookmark_msg)
-            except InternalException:
-                add_bookmark_msg = f'<div style="color:red">{ADD_BOOKMARK_ERR_MSG}</div>'
-                return _main_page_html(add_bookmark_msg=add_bookmark_msg,
-                                       add_title_val=title,
-                                       add_description_val=description,
-                                       add_url_val=url)
-
-    def run(self, host, port):
-        self.app.run(host=host, port=port)
+        try:
+            self.server.add_bookmark(title, description, url)
+            return self._main_page(
+                    True, ADD_BOOKMARK_OK_MSG,
+                    "", "", "")
+        except InternalException:
+            return self._main_page(
+                    False, ADD_BOOKMARK_ERR_MSG,
+                    title, description, url)

@@ -1,7 +1,7 @@
 import requests
 
 from app import app
-from src.tests.test_e2e_base import TestE2eBase
+from tests.test_e2e_base import TestE2eBase
 
 
 URL = "http://localhost:8000"
@@ -11,6 +11,9 @@ class TestE2eGetBookmarks(TestE2eBase):
     def test_empty_get(self):
         response = requests.get(URL)
         self._compare_num_bookmarks(response, 0)
+        # test that where there are 0 bookmarks,
+        # we don't accidentally display the error msg
+        assert app.GET_BOOKMARKS_ERR_MSG not in response.text
 
     def test_get_bookmarks(self):
         response = requests.get(URL)
