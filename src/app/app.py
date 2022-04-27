@@ -1,7 +1,9 @@
 import logging
 
+from flask import escape
+
 from server.server_api import InternalException
-from server.bookmarks import html_escape
+from server.bookmarks import Bookmark
 from app.app_sections import DisplayBookmarksSection, AddBookmarkSection
 
 
@@ -12,6 +14,12 @@ ADD_BOOKMARK_TITLE_REQUIRED_MSG = "Error: Title is a required field"
 ADD_BOOKMARK_URL_REQUIRED_MSG = "Error: URL is a required field"
 
 logger = logging.getLogger()
+
+
+def html_escape(text):
+    if not text:
+        return text
+    return escape(text)
 
 
 class App:
@@ -25,16 +33,26 @@ class App:
             add_bookmarks_section: DisplayBookmarksSection object
 
         Returns:
-            display_bookmarks_section:
-                DisplayBookmarksSection object
+            escaped_display_bookmarks_section:
+                DisplayBookmarksSection object after escaping the relevant fields
             escaped_add_bookmarks_section:
                 AddBookmarkSection object after escaping the relevant fields
         """
         try:
-            bookmarks = self.server.get_all_bookmarks()
-            display_bookmarks_section = DisplayBookmarksSection(bookmarks, None)
+            escaped_bookmarks = []
+            for b in self.server.get_all_bookmarks():
+                escaped_bookmarks.append(
+                    Bookmark(
+                        b.id,
+                        html_escape(b.title),
+                        html_escape(b.description),
+                        html_escape(b.url)
+                    )
+                )
+
+            escaped_display_bookmarks_section = DisplayBookmarksSection(escaped_bookmarks, None)
         except InternalException:
-            display_bookmarks_section = DisplayBookmarksSection(None, GET_BOOKMARKS_ERR_MSG)
+            escaped_display_bookmarks_section = DisplayBookmarksSection(None, GET_BOOKMARKS_ERR_MSG)
 
         # escape add_bookmarks_section
         escaped_add_bookmarks_section = AddBookmarkSection(
@@ -45,7 +63,7 @@ class App:
             html_escape(add_bookmarks_section.last_url)
         )
 
-        return display_bookmarks_section, escaped_add_bookmarks_section
+        return escaped_display_bookmarks_section, escaped_add_bookmarks_section
 
     def display_bookmarks(self):
         """
