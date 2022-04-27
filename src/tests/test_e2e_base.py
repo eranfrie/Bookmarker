@@ -12,7 +12,7 @@ from data.sqlite import Sqlite
 OUTPUT_DIR = "tmp"
 DB_FILENAME = "bookmarks.db"
 
-NUM_MENU_LINKS = 1
+NUM_MENU_LINKS = 2
 
 
 # pylint: disable=W0201, R0201 (attribute-defined-outside-init, no-self-use)

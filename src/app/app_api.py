@@ -1,13 +1,15 @@
 from flask import Flask, request
 
-from utils import opts
+from utils import opts, version
 
 
 PAGE_HOME = "Home"
 PAGE_IMPORT = "Import"
+PAGE_ABOUT = "About"
 pages = {
     PAGE_HOME: "/",
     PAGE_IMPORT: "/import",
+    PAGE_ABOUT: "/about",
 }
 
 
@@ -93,6 +95,18 @@ class AppAPI:
             import_section += "TBD ..."
 
             return _header() + _menu(PAGE_IMPORT) + import_section
+
+        @self.app_api.route('/about')
+        def about():
+            about_section = '<h4>About</h4>'
+
+            ver = version.get_version()
+            about_section += f'{opts.PROD_NAME} Version {ver}<br/>'
+
+            home_page = "https://github.com/eranfrie/Bookmarker"
+            about_section += f'Home page: <a href="{home_page}" target="_blank">{home_page}</a>'
+
+            return _header() + _menu(PAGE_ABOUT) + about_section
 
     def run(self, host, port):
         self.app_api.run(host=host, port=port)  # blocking
