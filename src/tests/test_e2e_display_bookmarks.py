@@ -7,7 +7,7 @@ from tests.test_e2e_base import TestE2eBase
 URL = "http://localhost:8000"
 
 
-class TestE2eGetBookmarks(TestE2eBase):
+class TestE2eDisplayBookmarks(TestE2eBase):
     def test_empty_get(self):
         response = requests.get(URL)
         self._compare_num_bookmarks(response, 0)
