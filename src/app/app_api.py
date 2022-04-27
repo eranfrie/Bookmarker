@@ -24,11 +24,11 @@ class AppAPI:
                 color = "green" if add_bookmark_section.last_op_succeeded else "red"
                 html += f'<div style="color:{color}">{add_bookmark_section.last_op_msg}</div>'
             html += f'<form action="/add_bookmark" method="post">' \
-                    f'<input type="text" name="title" required=true placeholder="* Title" ' \
+                    f'<input type="text" name="title" placeholder="* Title" ' \
                     f'size="50" value="{add_bookmark_section.last_title}"><br>' \
                     f'<input type="text" name="description" placeholder="Description" ' \
                     f'size="50" value="{add_bookmark_section.last_description}"><br>' \
-                    f'<input type="text" name="url" required=true placeholder="* URL" ' \
+                    f'<input type="text" name="url" placeholder="* URL" ' \
                     f'size="50" value="{add_bookmark_section.last_url}"><br>' \
                     f'<input type="submit">' \
                 f'</form>' \
