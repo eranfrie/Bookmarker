@@ -1,11 +1,8 @@
 [MASTER]
 
-max-args = 7
-
 max-line-length = 110
 
 disable=
     too-few-public-methods,
     missing-docstring,
-    invalid-name,
-    fixme
+    invalid-name
