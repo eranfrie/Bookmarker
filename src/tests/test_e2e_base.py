@@ -7,12 +7,13 @@ import requests
 from main import main
 from data import sqlite
 from data.sqlite import Sqlite
+from app.app_api import pages
 
 
 OUTPUT_DIR = "tmp"
 DB_FILENAME = "bookmarks.db"
 
-NUM_MENU_LINKS = 2
+NUM_MENU_LINKS = len(pages) - 1
 
 
 # pylint: disable=W0201, R0201 (attribute-defined-outside-init, no-self-use)
