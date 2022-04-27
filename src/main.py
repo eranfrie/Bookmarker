@@ -34,7 +34,7 @@ def main(override_config):
     logs_dir = Path(output_dir, log.LOGS_DIR)
     try:
         logs_dir.mkdir(parents=True, exist_ok=True)
-    # pylint: disable=W0703
+    # pylint: disable=W0703 (broad-except)
     except Exception as e:
         print(f"Failed to create {logs_dir} directory {e}")
 

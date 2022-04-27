@@ -13,7 +13,7 @@ OUTPUT_DIR = "tmp"
 DB_FILENAME = "bookmarks.db"
 
 
-# pylint: disable=W0201, R0201
+# pylint: disable=W0201, R0201 (attribute-defined-outside-init, no-self-use)
 class TestE2eBase:
     def setup(self):
         # delete old db
@@ -59,10 +59,10 @@ class TestE2eBase:
     def _count_bookmarks_in_db(self):
         db_filename = Path(OUTPUT_DIR, DB_FILENAME)
         db = Sqlite(db_filename)
-        conn, cursor = db._connect()  # pylint: disable=W0212
+        conn, cursor = db._connect()  # pylint: disable=W0212 (protected-access)
         res = cursor.execute(f"SELECT COUNT() FROM {sqlite.BOOKMARKS_TABLE};")
         res = res.fetchone()[0]
-        Sqlite._close(conn)  # pylint: disable=W0212
+        Sqlite._close(conn)  # pylint: disable=W0212 (protected-access)
         return res
 
     def _delete_db(self):

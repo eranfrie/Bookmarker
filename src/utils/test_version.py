@@ -1,7 +1,7 @@
 from utils import version
 
 
-# pylint: disable=R0201
+# pylint: disable=R0201 (no-self-use)
 class TestVersion:
     def test_version(self):
         """

@@ -1,7 +1,7 @@
 from html.parser import HTMLParser
 
 
-# pylint: disable=W0223
+# pylint: disable=W0223 (abstract-method)
 class ChromeParser(HTMLParser):
     def __init__(self):
         super().__init__()

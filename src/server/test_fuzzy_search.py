@@ -1,7 +1,7 @@
 from server.fuzzy_search import is_match
 
 
-# pylint: disable=R0201
+# pylint: disable=R0201 (no-self-use)
 class TestFuzzySearch:
     def test_match(self):
         assert is_match("", "")
