@@ -1,16 +1,22 @@
+from enum import Enum
+
 from flask import Flask, request
 
 from utils import opts, version
 
 
-PAGE_HOME = "Home"
-PAGE_IMPORT = "Import"
-PAGE_ABOUT = "About"
-pages = {
-    PAGE_HOME: "/",
-    PAGE_IMPORT: "/import",
-    PAGE_ABOUT: "/about",
+class Page (Enum):
+    HOME = "Home"
+    IMPORT = "Import"
+    ABOUT = "About"
+
+
+page_to_route = {
+    Page.HOME: "/",
+    Page.IMPORT: "/import",
+    Page.ABOUT: "/about",
 }
+assert len(Page) == len(page_to_route)
 
 
 class AppAPI:
@@ -42,16 +48,16 @@ class AppAPI:
             html = '<p  style="text-align:center"><b>'
 
             first_page = True
-            for p, url in pages.items():
+            for page, url in page_to_route.items():
                 if first_page:
                     first_page = False
                 else:
                     html += ' | '
 
-                if p == curr_page:
-                    html += p
+                if page == curr_page:
+                    html += page.value
                 else:
-                    html += f'<a href={url} style="color:black">' + p + '</a>'
+                    html += f'<a href={url} style="color:black">' + page.value + '</a>'
 
             html += '</b></h1>'
             return html
@@ -78,7 +84,7 @@ class AppAPI:
         @self.app_api.route('/')
         def index():
             display_bookmarks_section, add_bookmark_section = self.app.display_bookmarks()
-            return _main_page(display_bookmarks_section, add_bookmark_section, PAGE_HOME)
+            return _main_page(display_bookmarks_section, add_bookmark_section, Page.HOME)
 
         @self.app_api.route('/add_bookmark', methods=["POST"])
         def add_bookmark():
@@ -87,14 +93,14 @@ class AppAPI:
             url = request.form.get("url")
 
             display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(title, description, url)
-            return _main_page(display_bookmarks_section, add_bookmark_section, PAGE_IMPORT)
+            return _main_page(display_bookmarks_section, add_bookmark_section, Page.IMPORT)
 
         @self.app_api.route('/import')
         def import_bookmarks():
             import_section = '<h4>Import bookmarks</h4>'
             import_section += "TBD ..."
 
-            return _header() + _menu(PAGE_IMPORT) + import_section
+            return _header() + _menu(Page.IMPORT) + import_section
 
         @self.app_api.route('/about')
         def about():
@@ -106,7 +112,7 @@ class AppAPI:
             home_page = "https://github.com/eranfrie/Bookmarker"
             about_section += f'Home page: <a href="{home_page}" target="_blank">{home_page}</a>'
 
-            return _header() + _menu(PAGE_ABOUT) + about_section
+            return _header() + _menu(Page.ABOUT) + about_section
 
     def run(self, host, port):
         self.app_api.run(host=host, port=port)  # blocking
