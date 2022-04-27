@@ -3,6 +3,14 @@ from flask import Flask, request
 from utils import opts
 
 
+PAGE_HOME = "Home"
+PAGE_IMPORT = "Import"
+pages = {
+    PAGE_HOME: "/",
+    PAGE_IMPORT: "/import",
+}
+
+
 class AppAPI:
     def __init__(self, app):
         self.app = app
@@ -25,9 +33,28 @@ class AppAPI:
                 f"<hr>"
             return html
 
-        def _main_page(display_bookmarks_section, add_bookmark_section):
-            header = f'<h1 style="text-align:center">{opts.PROD_NAME}</h1>'
+        def _header():
+            return f'<h1 style="text-align:center">{opts.PROD_NAME}</h1>'
 
+        def _menu(curr_page):
+            html = '<p  style="text-align:center"><b>'
+
+            first_page = True
+            for p, url in pages.items():
+                if first_page:
+                    first_page = False
+                else:
+                    html += ' | '
+
+                if p == curr_page:
+                    html += p
+                else:
+                    html += f'<a href={url} style="color:black">' + p + '</a>'
+
+            html += '</b></h1>'
+            return html
+
+        def _main_page(display_bookmarks_section, add_bookmark_section, curr_page):
             add_bookmark_form = _add_bookmark_form(add_bookmark_section)
 
             bookmarks_section = ""
@@ -44,12 +71,12 @@ class AppAPI:
                 bookmarks_section = \
                     f'<div style="color:red">{display_bookmarks_section.display_bookmarks_err}</div>'
 
-            return header + add_bookmark_form + bookmarks_section
+            return _header() + _menu(curr_page) + add_bookmark_form + bookmarks_section
 
         @self.app_api.route('/')
         def index():
             display_bookmarks_section, add_bookmark_section = self.app.display_bookmarks()
-            return _main_page(display_bookmarks_section, add_bookmark_section)
+            return _main_page(display_bookmarks_section, add_bookmark_section, PAGE_HOME)
 
         @self.app_api.route('/add_bookmark', methods=["POST"])
         def add_bookmark():
@@ -58,7 +85,14 @@ class AppAPI:
             url = request.form.get("url")
 
             display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(title, description, url)
-            return _main_page(display_bookmarks_section, add_bookmark_section)
+            return _main_page(display_bookmarks_section, add_bookmark_section, PAGE_IMPORT)
+
+        @self.app_api.route('/import')
+        def import_bookmarks():
+            import_section = '<h4>Import bookmarks</h4>'
+            import_section += "TBD ..."
+
+            return _header() + _menu(PAGE_IMPORT) + import_section
 
     def run(self, host, port):
         self.app_api.run(host=host, port=port)  # blocking

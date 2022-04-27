@@ -12,6 +12,8 @@ from data.sqlite import Sqlite
 OUTPUT_DIR = "tmp"
 DB_FILENAME = "bookmarks.db"
 
+NUM_MENU_LINKS = 1
+
 
 # pylint: disable=W0201, R0201 (attribute-defined-outside-init, no-self-use)
 class TestE2eBase:
@@ -46,7 +48,7 @@ class TestE2eBase:
 
     def _compare_num_bookmarks(self, response, expected_num_bookmarks, db_avail=True):
         assert response.status_code == 200
-        assert response.text.count("href") == expected_num_bookmarks
+        assert response.text.count("href") == expected_num_bookmarks + NUM_MENU_LINKS
         if db_avail:
             assert f"Total: {expected_num_bookmarks}" in response.text
             assert self._count_bookmarks_in_db() == expected_num_bookmarks
