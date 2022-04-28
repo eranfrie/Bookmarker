@@ -5,6 +5,13 @@ from flask import Flask, request
 from utils import opts, version
 
 
+class Route (Enum):
+    INDEX = "/"
+    ADD_BOOKMARK = "/add_bookmark"
+    IMPORT = "/import"
+    ABOUT = "/about"
+
+
 class Page (Enum):
     HOME = "Home"
     IMPORT = "Import"
@@ -12,9 +19,9 @@ class Page (Enum):
 
 
 page_to_route = {
-    Page.HOME: "/",
-    Page.IMPORT: "/import",
-    Page.ABOUT: "/about",
+    Page.HOME: Route.INDEX.value,
+    Page.IMPORT: Route.IMPORT.value,
+    Page.ABOUT: Route.ABOUT.value,
 }
 assert len(Page) == len(page_to_route)
 
@@ -81,12 +88,12 @@ class AppAPI:
 
             return _header() + _menu(curr_page) + add_bookmark_form + bookmarks_section
 
-        @self.app_api.route('/')
+        @self.app_api.route(Route.INDEX.value)
         def index():
             display_bookmarks_section, add_bookmark_section = self.app.display_bookmarks()
             return _main_page(display_bookmarks_section, add_bookmark_section, Page.HOME)
 
-        @self.app_api.route('/add_bookmark', methods=["POST"])
+        @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
         def add_bookmark():
             title = request.form.get("title")
             description = request.form.get("description")
@@ -95,14 +102,14 @@ class AppAPI:
             display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(title, description, url)
             return _main_page(display_bookmarks_section, add_bookmark_section, Page.IMPORT)
 
-        @self.app_api.route('/import')
+        @self.app_api.route(Route.IMPORT.value)
         def import_bookmarks():
             import_section = '<h4>Import bookmarks</h4>'
             import_section += "TBD ..."
 
             return _header() + _menu(Page.IMPORT) + import_section
 
-        @self.app_api.route('/about')
+        @self.app_api.route(Route.ABOUT.value)
         def about():
             about_section = '<h4>About</h4>'
 

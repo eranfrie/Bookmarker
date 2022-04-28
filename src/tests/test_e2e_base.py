@@ -1,19 +1,30 @@
 from multiprocessing import Process
 from pathlib import Path
 from time import sleep
+from enum import Enum
 
 import requests
 
 from main import main
 from data import sqlite
 from data.sqlite import Sqlite
-from app.app_api import page_to_route
+from app.app_api import page_to_route, Route
 
 
 OUTPUT_DIR = "tmp"
 DB_FILENAME = "bookmarks.db"
-
+TEST_URL = "http://localhost:8000"
 NUM_MENU_LINKS = len(page_to_route) - 1
+
+
+class URL (Enum):
+    INDEX = TEST_URL + Route.INDEX.value
+    ADD_BOOKMARK = TEST_URL + Route.ADD_BOOKMARK.value
+    IMPORT = TEST_URL + Route.IMPORT.value
+    ABOUT = TEST_URL + Route.ABOUT.value
+
+
+assert len(URL) == len(Route), "Need to test new route"
 
 
 # pylint: disable=W0201, R0201 (attribute-defined-outside-init, no-self-use)
@@ -32,7 +43,7 @@ class TestE2eBase:
         # wait for server to start
         for _ in range(120):
             try:
-                r = requests.get("http://localhost:8000")
+                r = requests.get(URL.INDEX.value)
                 if r.status_code == 200:
                     return
             except requests.exceptions.ConnectionError:

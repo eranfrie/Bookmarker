@@ -3,11 +3,7 @@ import re
 import requests
 
 from app import app
-from tests.test_e2e_base import TestE2eBase
-
-
-URL = "http://localhost:8000"
-ADD_BOOKMARK_URL = f"{URL}/add_bookmark"
+from tests.test_e2e_base import TestE2eBase, URL
 
 
 class TestE2e(TestE2eBase):
@@ -18,7 +14,7 @@ class TestE2e(TestE2eBase):
             "description": "test_description",
             "url": "http://www.test.com",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 1)
 
         # add another bookmark
@@ -27,7 +23,7 @@ class TestE2e(TestE2eBase):
             "description": "test_description_2",
             "url": "http://www.test_2.com",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 2)
 
         # validate fields order
@@ -43,7 +39,7 @@ class TestE2e(TestE2eBase):
             "title": "test_title",
             "url": "http://www.test.com",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 1)
 
     def test_not_desplaying_missing_description(self):
@@ -54,7 +50,7 @@ class TestE2e(TestE2eBase):
             "title": "test_title",
             "url": "http://www.test.com",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 1)
         assert "None" not in response.text
 
@@ -67,12 +63,12 @@ class TestE2e(TestE2eBase):
             "description": "test_description",
             "url": "http://www.test.com",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 0, db_avail=False)
         assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 1
         assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
 
-        response = requests.get(URL)
+        response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 0, db_avail=False)
         assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 0
         assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
@@ -84,11 +80,11 @@ class TestE2e(TestE2eBase):
             "description": "test_description",
             "url": "http://www.test.com",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 1)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
 
-        response = requests.get(URL)
+        response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 1)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 0
 
@@ -98,11 +94,11 @@ class TestE2e(TestE2eBase):
             "description": "test_description_2",
             "url": "http://www.test_2.com",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 2)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
 
-        response = requests.get(URL)
+        response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 0
 
@@ -111,7 +107,7 @@ class TestE2e(TestE2eBase):
             "description": "test_description",
             "url": "http://www.test.com",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 0)
         assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
 
@@ -120,7 +116,7 @@ class TestE2e(TestE2eBase):
             "title": "test_title_2",
             "description": "test_description",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 0)
         assert response.text.count(app.ADD_BOOKMARK_URL_REQUIRED_MSG) == 1
 
@@ -130,7 +126,7 @@ class TestE2e(TestE2eBase):
             "description": "<>test_description",
             "url": "<>http://www.test.com",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 1)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
         pattern = "&lt;&gt;test_title.*&lt;&gt;test_description.*&lt;&gt;http://www\\.test\\.com"
@@ -143,7 +139,7 @@ class TestE2e(TestE2eBase):
             "description": "'select *'",
             "url": "'select *'",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 1)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
 
@@ -153,7 +149,7 @@ class TestE2e(TestE2eBase):
             "description": '"select *"',
             "url": '"select *"',
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 2)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
 
@@ -163,7 +159,7 @@ class TestE2e(TestE2eBase):
             "description": "test description",
             "url": "test url",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 1)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
         assert "test title" in response.text \
@@ -180,7 +176,7 @@ class TestE2e(TestE2eBase):
             "description": "test_description",
             "url": "test_url",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 0)
         assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
         assert 'value="test_description"' in response.text \
@@ -191,7 +187,7 @@ class TestE2e(TestE2eBase):
             "title": "test_title",
             "description": "test_description",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 0)
         assert response.text.count(app.ADD_BOOKMARK_URL_REQUIRED_MSG) == 1
         assert 'value="test_description"' in response.text \
@@ -204,7 +200,7 @@ class TestE2e(TestE2eBase):
             "description": "test_description",
             "url": "test_url",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 0, db_avail=False)
         assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 1
         assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
@@ -225,7 +221,7 @@ class TestE2e(TestE2eBase):
             "description": "<test_description>",
             "url": "<test_url>",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 0, db_avail=False)
         assert response.text.count(app.ADD_BOOKMARK_ERR_MSG) == 1
         assert response.text.count(app.GET_BOOKMARKS_ERR_MSG) == 1
@@ -245,7 +241,7 @@ class TestE2e(TestE2eBase):
             "description": "<test_description>",
             "url": "<test_url>",
         }
-        response = requests.post(ADD_BOOKMARK_URL, data=payload)
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         self._compare_num_bookmarks(response, 1)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
         assert 'value="&lt;test_description&gt;"' not in response.text \
