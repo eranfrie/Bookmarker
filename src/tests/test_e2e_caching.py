@@ -1,6 +1,5 @@
 import requests
 
-from app import app
 from tests.test_e2e_base import TestE2eBase, URL
 
 

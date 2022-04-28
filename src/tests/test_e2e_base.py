@@ -86,10 +86,12 @@ class TestE2eBase:
             pass
 
     def _add_bookmark(self, title, description, url):
-        payload = {
-            "title": title,
-            "description": description,
-            "url": url,
-        }
+        payload = {}
+        if title:
+            payload["title"] = title
+        if description:
+            payload["description"] = description
+        if url:
+            payload["url"] = url
         response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
         return response
