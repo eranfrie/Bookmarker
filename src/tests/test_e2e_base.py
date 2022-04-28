@@ -84,3 +84,12 @@ class TestE2eBase:
             Path(OUTPUT_DIR, DB_FILENAME).unlink()
         except FileNotFoundError:
             pass
+
+    def _add_bookmark(self, title, description, url):
+        payload = {
+            "title": title,
+            "description": description,
+            "url": url,
+        }
+        response = requests.post(URL.ADD_BOOKMARK.value, data=payload)
+        return response

@@ -17,12 +17,25 @@ class Bookmark:
 class Server:
     def __init__(self, db):
         self.db = db
+        self._cache = None
+
+    def _invalidate_cache(self):
+        logger.debug("invalidating cache")
+        self._cache = None
 
     def get_all_bookmarks(self):
         """
         Returns:
             list of Bookmark objects
         """
+        # don't use cache if cache is None -
+        #     it means either cache was invalidated or an error occurred in previous call
+        #     if an error occurred in previous call - we want to try again this time
+        # or if cache size is 0 -
+        #     mainly for tests (and it's not an interesting case to cache)
+        if self._cache:
+            return self._cache
+
         bookmarks = []
 
         try:
@@ -40,9 +53,13 @@ class Server:
                     j["url"],
                 )
             )
+
+        self._cache = bookmarks
         return bookmarks
 
     def add_bookmark(self, title, description, url):
+        self._invalidate_cache()
+
         try:
             self.db.add_bookmark(title, description, url)
             logger.info("bookmark added successfully")
