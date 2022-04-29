@@ -100,7 +100,7 @@ class AppAPI:
             url = request.form.get("url")
 
             display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(title, description, url)
-            return _main_page(display_bookmarks_section, add_bookmark_section, Page.IMPORT)
+            return _main_page(display_bookmarks_section, add_bookmark_section, Page.HOME)
 
         @self.app_api.route(Route.IMPORT.value)
         def import_bookmarks():
