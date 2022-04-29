@@ -1,5 +1,6 @@
 import logging
 
+from server.chrome_parser import ChromeParser
 from server.server_api import InternalException, TitleRequiredException, URLRequiredException
 
 
@@ -80,3 +81,22 @@ class Server:
             logger.exception("failed to add bookmark to db: title=%s, description=%s, url=%s",
                              title, description, url)
             raise InternalException() from e
+
+    def import_bookmarks(self, filename):
+        """
+        Raises:
+            Exception: in case of any error
+        """
+        self._invalidate_cache()
+
+        with open(filename, "r", encoding="utf-8") as f:
+            html_data = f.read()
+
+        bookmarks = ChromeParser().get_bookmarks(html_data)
+        for b in bookmarks:
+            try:
+                self.add_bookmark(b["title"], "", b["url"])
+            # pylint: disable=W0703 (broad-except)
+            except Exception:
+                logger.warning("import bookmark: failed to add bookmark: title=%s, description=%s, url=%s",
+                               b["title"], b["description"], b["url"])

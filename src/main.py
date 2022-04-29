@@ -46,7 +46,7 @@ def main(override_config):
     db_filename = Path(output_dir, "bookmarks.db")
     db = Sqlite(db_filename)
     server = Server(db)
-    app = App(server)
+    app = App(server, output_dir)
     AppAPI(app).run(conf["host"], conf["port"])  # blocking
 
 

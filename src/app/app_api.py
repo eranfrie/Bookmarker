@@ -1,8 +1,12 @@
+import logging
 from enum import Enum
 
 from flask import Flask, request
 
 from utils import opts, version
+
+
+logger = logging.getLogger()
 
 
 class Route (Enum):
@@ -27,6 +31,7 @@ assert len(Page) == len(page_to_route)
 
 
 class AppAPI:
+    # pylint: disable=R0915 (too-many-statements)
     def __init__(self, app):
         self.app = app
         self.app_api = Flask(__name__)
@@ -102,10 +107,26 @@ class AppAPI:
             display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(title, description, url)
             return _main_page(display_bookmarks_section, add_bookmark_section)
 
-        @self.app_api.route(Route.IMPORT.value)
+        @self.app_api.route(Route.IMPORT.value, methods=["GET", "POST"])
         def import_bookmarks():
+            if request.method == "POST":
+                try:
+                    logger.debug("got POST request to import bookmarks")
+                    f = request.files["bookmarks_html"]
+                    logger.debug("import bookmarks - saving file %s to %s",
+                                 f, self.app.import_bookmarks_filename)
+                    f.save(self.app.import_bookmarks_filename)
+                    logger.debug("import bookmarks - file saved")
+                    self.app.import_bookmarks()
+                # pylint: disable=W0703 (broad-except)
+                except Exception:
+                    logger.exception("failed to import bookmarks")
+
             import_section = '<h4>Import bookmarks</h4>'
-            import_section += "TBD ..."
+            import_section += '<form action="/import" method="post" enctype = "multipart/form-data">'
+            import_section += '<input type="file" name="bookmarks_html">'
+            import_section += '<input type="submit">'
+            import_section += '</form>'
 
             return _header() + _menu(Page.IMPORT) + import_section
 

@@ -1,3 +1,4 @@
+from pathlib import Path
 import logging
 
 from flask import escape
@@ -13,6 +14,8 @@ ADD_BOOKMARK_OK_MSG = "Bookmark added successfully"
 ADD_BOOKMARK_TITLE_REQUIRED_MSG = "Error: Title is a required field"
 ADD_BOOKMARK_URL_REQUIRED_MSG = "Error: URL is a required field"
 
+IMPORT_BOOKMARKS_FILENAME = "tmp_bookmarks.html"
+
 logger = logging.getLogger()
 
 
@@ -23,8 +26,9 @@ def html_escape(text):
 
 
 class App:
-    def __init__(self, server):
+    def __init__(self, server, output_dir):
         self.server = server
+        self.import_bookmarks_filename = Path(output_dir, IMPORT_BOOKMARKS_FILENAME)
 
     def _main_page(self, add_bookmarks_section):
         """Returns all information to be displayed in the main page.
@@ -96,3 +100,6 @@ class App:
             add_bookmarks_section = AddBookmarkSection(
                     False, ADD_BOOKMARK_URL_REQUIRED_MSG, title, description, url)
             return self._main_page(add_bookmarks_section)
+
+    def import_bookmarks(self):
+        self.server.import_bookmarks(self.import_bookmarks_filename)
