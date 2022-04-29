@@ -28,7 +28,7 @@ class TestE2e(TestE2eBase):
         response = self._add_bookmark("test_title", "", "http://www.test.com")
         self._compare_num_bookmarks(response, 1)
 
-    def test_not_desplaying_missing_description(self):
+    def test_not_displaying_missing_description(self):
         """
         a missing (optional) description should not be displayed as "None".
         """
@@ -78,6 +78,16 @@ class TestE2e(TestE2eBase):
         response = self._add_bookmark("test_title_2", "test_description", "")
         self._compare_num_bookmarks(response, 0)
         assert response.text.count(app.ADD_BOOKMARK_URL_REQUIRED_MSG) == 1
+
+    def test_add_bookmark_description_only(self):
+        response = self._add_bookmark("", "test_description", "")
+        self._compare_num_bookmarks(response, 0)
+        assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
+
+    def test_add_bookmark_no_fields(self):
+        response = self._add_bookmark("", "", "")
+        self._compare_num_bookmarks(response, 0)
+        assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
 
     def test_html_escaping(self):
         response = self._add_bookmark("<>test_title", "<>test_description", "<>http://www.test.com")
