@@ -60,6 +60,11 @@ class Server:
     def add_bookmark(self, title, description, url):
         self._invalidate_cache()
 
+        # strip input
+        title = title if title is None else title.strip()
+        description = description if description is None else description.strip()
+        url = url if url is None else url.strip()
+
         # input validation
         if not title:
             logger.debug("add bookmark failed - title is required")

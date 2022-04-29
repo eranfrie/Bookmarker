@@ -3,7 +3,6 @@ import requests
 from tests.test_e2e_base import TestE2eBase, URL
 
 
-# pylint: disable=R0201 (no-self-use)
 class TestE2eCaching(TestE2eBase):
     def test_cache(self):
         # add a bookmark
