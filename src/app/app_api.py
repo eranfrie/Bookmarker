@@ -69,7 +69,7 @@ class AppAPI:
             html += '</b></h1>'
             return html
 
-        def _main_page(display_bookmarks_section, add_bookmark_section, curr_page):
+        def _main_page(display_bookmarks_section, add_bookmark_section):
             add_bookmark_form = _add_bookmark_form(add_bookmark_section)
 
             bookmarks_section = ""
@@ -86,12 +86,12 @@ class AppAPI:
                 bookmarks_section = \
                     f'<div style="color:red">{display_bookmarks_section.display_bookmarks_err}</div>'
 
-            return _header() + _menu(curr_page) + add_bookmark_form + bookmarks_section
+            return _header() + _menu(Page.HOME) + add_bookmark_form + bookmarks_section
 
         @self.app_api.route(Route.INDEX.value)
         def index():
             display_bookmarks_section, add_bookmark_section = self.app.display_bookmarks()
-            return _main_page(display_bookmarks_section, add_bookmark_section, Page.HOME)
+            return _main_page(display_bookmarks_section, add_bookmark_section)
 
         @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
         def add_bookmark():
@@ -100,7 +100,7 @@ class AppAPI:
             url = request.form.get("url")
 
             display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(title, description, url)
-            return _main_page(display_bookmarks_section, add_bookmark_section, Page.HOME)
+            return _main_page(display_bookmarks_section, add_bookmark_section)
 
         @self.app_api.route(Route.IMPORT.value)
         def import_bookmarks():
