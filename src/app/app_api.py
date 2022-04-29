@@ -121,13 +121,14 @@ class AppAPI:
                     logger.debug("import bookmarks - file saved")
                     num_added, num_failed = self.app.import_bookmarks()
                     if num_added > 0:
-                        last_op_html = f'<div style="color:green">Imported {num_added} bookmarks</div>'
+                        last_op_html += f'<div style="color:green">Imported {num_added} bookmarks</div>'
                     if num_failed > 0:
-                        last_op_html += f'<div style="color:red">Failed to import {num_failed} bookmarks</div>'
+                        last_op_html += \
+                                f'<div style="color:red">Failed to import {num_failed} bookmarks</div>'
                 # pylint: disable=W0703 (broad-except)
                 except Exception:
                     logger.exception("failed to import bookmarks")
-                    last_op_html = f'<div style="color:red">Failed to import bookmarks</div>'
+                    last_op_html = '<div style="color:red">Failed to import bookmarks</div>'
 
             import_section = '<h4>Import bookmarks</h4>'
             import_section += last_op_html
