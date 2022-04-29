@@ -3,10 +3,11 @@ from server.chrome_parser import ChromeParser
 
 # pylint: disable=R0201 (no-self-use)
 class TestFuzzySearch:
-    def test_chrome_bookmarks(self):
-        with open("src/tests/chrome_bookmarks_test.html", "r", encoding="ascii") as f:
-            html_data = f.read()
+    def _read_file(self, filename):
+        with open(filename, "r", encoding="ascii") as f:
+            return f.read()
 
+    def test_chrome_bookmarks(self):
         expected_bookmarks = [
             {"section": "", "title": "n1"},
             {"section": "s1", "title": "n1_1"},
@@ -16,6 +17,7 @@ class TestFuzzySearch:
             {"section": "s2", "title": "n2_1"},
         ]
 
+        html_data = self._read_file("src/tests/chrome_bookmarks_test.html")
         bookmarks = ChromeParser().get_bookmarks(html_data)
 
         for b, e in zip(bookmarks, expected_bookmarks):
@@ -23,8 +25,6 @@ class TestFuzzySearch:
             assert b["title"] == e["title"]
 
     def test_chrome_bookmarks_invalid_html(self):
-        with open("src/tests/chrome_bookmarks_invalid.html", "r", encoding="ascii") as f:
-            html_data = f.read()
-
+        html_data = self._read_file("src/tests/chrome_bookmarks_invalid.html",)
         bookmarks = ChromeParser().get_bookmarks(html_data)
         assert len(bookmarks) == 0
