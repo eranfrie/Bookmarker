@@ -2,7 +2,7 @@ import logging
 
 from flask import escape
 
-from server.server_api import InternalException
+from server.server_api import InternalException, TitleRequiredException, URLRequiredException
 from server.bookmarks import Bookmark
 from app.app_sections import DisplayBookmarksSection, AddBookmarkSection
 
@@ -81,19 +81,18 @@ class App:
         logger.info("got request to add bookmark: title=%s, desc=%s, url=%s",
                     title, description, url)
 
-        # input validation
-        # not expected to happen because browser enforces it
-        # (using HTML 'required' attribute)
-        if not title or not url:
-            add_bookmark_msg = ADD_BOOKMARK_TITLE_REQUIRED_MSG if not title \
-                    else ADD_BOOKMARK_URL_REQUIRED_MSG
-            add_bookmarks_section = AddBookmarkSection(False, add_bookmark_msg, title, description, url)
-            return self._main_page(add_bookmarks_section)
-
         try:
             self.server.add_bookmark(title, description, url)
             add_bookmarks_section = AddBookmarkSection(True, ADD_BOOKMARK_OK_MSG, "", "", "")
             return self._main_page(add_bookmarks_section)
         except InternalException:
             add_bookmarks_section = AddBookmarkSection(False, ADD_BOOKMARK_ERR_MSG, title, description, url)
+            return self._main_page(add_bookmarks_section)
+        except TitleRequiredException:
+            add_bookmarks_section = AddBookmarkSection(
+                    False, ADD_BOOKMARK_TITLE_REQUIRED_MSG, title, description, url)
+            return self._main_page(add_bookmarks_section)
+        except URLRequiredException:
+            add_bookmarks_section = AddBookmarkSection(
+                    False, ADD_BOOKMARK_URL_REQUIRED_MSG, title, description, url)
             return self._main_page(add_bookmarks_section)

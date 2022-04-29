@@ -1,6 +1,6 @@
 import logging
 
-from server.server_api import InternalException
+from server.server_api import InternalException, TitleRequiredException, URLRequiredException
 
 
 logger = logging.getLogger()
@@ -59,6 +59,14 @@ class Server:
 
     def add_bookmark(self, title, description, url):
         self._invalidate_cache()
+
+        # input validation
+        if not title:
+            logger.debug("add bookmark failed - title is required")
+            raise TitleRequiredException()
+        if not url:
+            logger.debug("add bookmark failed - url is required")
+            raise URLRequiredException()
 
         try:
             self.db.add_bookmark(title, description, url)
