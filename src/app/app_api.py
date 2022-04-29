@@ -109,6 +109,8 @@ class AppAPI:
 
         @self.app_api.route(Route.IMPORT.value, methods=["GET", "POST"])
         def import_bookmarks():
+            last_op_html = ""
+
             if request.method == "POST":
                 try:
                     logger.debug("got POST request to import bookmarks")
@@ -117,12 +119,18 @@ class AppAPI:
                                  f, self.app.import_bookmarks_filename)
                     f.save(self.app.import_bookmarks_filename)
                     logger.debug("import bookmarks - file saved")
-                    self.app.import_bookmarks()
+                    num_added, num_failed = self.app.import_bookmarks()
+                    if num_added > 0:
+                        last_op_html = f'<div style="color:green">Imported {num_added} bookmarks</div>'
+                    if num_failed > 0:
+                        last_op_html += f'<div style="color:red">Failed to import {num_failed} bookmarks</div>'
                 # pylint: disable=W0703 (broad-except)
                 except Exception:
                     logger.exception("failed to import bookmarks")
+                    last_op_html = f'<div style="color:red">Failed to import bookmarks</div>'
 
             import_section = '<h4>Import bookmarks</h4>'
+            import_section += last_op_html
             import_section += '<form action="/import" method="post" enctype = "multipart/form-data">'
             import_section += '<input type="file" name="bookmarks_html">'
             import_section += '<input type="submit">'

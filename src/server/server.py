@@ -86,6 +86,10 @@ class Server:
         """
         Raises:
             Exception: in case of any error
+
+        Returns:
+            num_added
+            num_failed
         """
         self._invalidate_cache()
 
@@ -93,10 +97,17 @@ class Server:
             html_data = f.read()
 
         bookmarks = ChromeParser().get_bookmarks(html_data)
+        num_added = 0
+        num_failed = 0
         for b in bookmarks:
             try:
                 self.add_bookmark(b["title"], "", b["url"])
+                num_added += 1
             # pylint: disable=W0703 (broad-except)
             except Exception:
-                logger.warning("import bookmark: failed to add bookmark: title=%s, description=%s, url=%s",
-                               b["title"], b["description"], b["url"])
+                logger.exception("import bookmark: failed to add bookmark: title=%s, url=%s",
+                                 b["title"], b["url"])
+                num_failed += 1
+
+        logger.info("import bookmarks - added=%s, failed=%s", num_added, num_failed)
+        return num_added, num_failed

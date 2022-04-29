@@ -102,4 +102,4 @@ class App:
             return self._main_page(add_bookmarks_section)
 
     def import_bookmarks(self):
-        self.server.import_bookmarks(self.import_bookmarks_filename)
+        return self.server.import_bookmarks(self.import_bookmarks_filename)
