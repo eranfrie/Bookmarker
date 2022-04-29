@@ -6,7 +6,7 @@ from utils import config, log, opts, version
 from app.app import App
 from app.app_api import AppAPI
 from data.sqlite import Sqlite
-from server.bookmarks import Server
+from server.server import Server
 
 
 def main(override_config):

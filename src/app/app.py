@@ -3,7 +3,7 @@ import logging
 from flask import escape
 
 from server.server_api import InternalException, TitleRequiredException, URLRequiredException
-from server.bookmarks import Bookmark
+from server.server import Bookmark
 from app.app_sections import DisplayBookmarksSection, AddBookmarkSection
 
 
