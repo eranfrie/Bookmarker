@@ -101,5 +101,22 @@ class App:
                     False, ADD_BOOKMARK_URL_REQUIRED_MSG, title, description, url)
             return self._main_page(add_bookmarks_section)
 
-    def import_bookmarks(self):
-        return self.server.import_bookmarks(self.import_bookmarks_filename)
+    def import_bookmarks(self, bookmarks_file):
+        """
+        Returns:
+            err (bool): whether an error happened
+            num_added: number of bookmarks that were added
+            num_failed: number of bookmarks that failed to be added
+                could be because of empty title or any other error
+        """
+        try:
+            logger.debug("import bookmarks - saving file %s to %s",
+                         bookmarks_file, self.import_bookmarks_filename)
+            bookmarks_file.save(self.import_bookmarks_filename)
+            logger.debug("import bookmarks - file saved")
+            num_added, num_failed = self.server.import_bookmarks(self.import_bookmarks_filename)
+            return False, num_added, num_failed
+        # pylint: disable=W0703 (broad-except)
+        except Exception:
+            logger.exception("failed to import bookmarks")
+            return True, None, None

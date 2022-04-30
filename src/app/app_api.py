@@ -112,23 +112,16 @@ class AppAPI:
             last_op_html = ""
 
             if request.method == "POST":
-                try:
-                    logger.debug("got POST request to import bookmarks")
-                    f = request.files["bookmarks_html"]
-                    logger.debug("import bookmarks - saving file %s to %s",
-                                 f, self.app.import_bookmarks_filename)
-                    f.save(self.app.import_bookmarks_filename)
-                    logger.debug("import bookmarks - file saved")
-                    num_added, num_failed = self.app.import_bookmarks()
+                f = request.files.get("bookmarks_html")
+                err, num_added, num_failed = self.app.import_bookmarks(f)
+                if err:
+                    last_op_html = '<div style="color:red">Failed to import bookmarks</div>'
+                else:
                     if num_added > 0:
                         last_op_html += f'<div style="color:green">Imported {num_added} bookmarks</div>'
                     if num_failed > 0:
                         last_op_html += \
                                 f'<div style="color:red">Failed to import {num_failed} bookmarks</div>'
-                # pylint: disable=W0703 (broad-except)
-                except Exception:
-                    logger.exception("failed to import bookmarks")
-                    last_op_html = '<div style="color:red">Failed to import bookmarks</div>'
 
             import_section = '<h4>Import bookmarks</h4>'
             import_section += last_op_html
