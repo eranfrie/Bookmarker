@@ -83,9 +83,11 @@ class AppAPI:
             if display_bookmarks_section.bookmarks is not None:
                 bookmarks_section += f"Total: {len(display_bookmarks_section.bookmarks)}<br><br>"
 
+                prev_section = None
                 for b in display_bookmarks_section.bookmarks:
-                    if b.section:
-                        bookmarks_section += f"[{b.section}] "
+                    if b.section and b.section != prev_section:
+                        prev_section = b.section
+                        bookmarks_section += f"<br><u><b><b>{b.section}</b></u><br>"
                     bookmarks_section += f"<b>{b.title}:</b> "
                     # description is optional
                     if b.description:
