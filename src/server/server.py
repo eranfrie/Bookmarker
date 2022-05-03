@@ -16,6 +16,15 @@ class Bookmark:
         self.url = url
         self.section = section
 
+    def __lt__(self, other):
+        if self.section.lower() != other.section.lower():
+            return self.section.lower() < other.section.lower()
+        if self.title.lower() != other.title.lower():
+            return self.title.lower() < other.title.lower()
+        if self.description.lower() != other.description.lower():
+            return self.description.lower() < other.description.lower()
+        return self.url.lower() < other.url.lower()
+
 
 class Server:
     def __init__(self, db):
@@ -48,18 +57,21 @@ class Server:
             raise InternalException() from e
 
         for j in bookmarks_json:
+            description = j["description"] if j["description"] else ""
+            section = j["section"] if j["section"] else ""
             bookmarks.append(
                 Bookmark(
                     j["id"],
                     j["title"],
-                    j["description"],
+                    description,
                     j["url"],
-                    j["section"],
+                    section,
                 )
             )
 
+        bookmarks.sort()
         self._cache = bookmarks
-        return bookmarks
+        return self._cache
 
     def add_bookmark(self, title, description, url, section):
         self._invalidate_cache()
