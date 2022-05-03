@@ -36,7 +36,8 @@ class Sqlite:
             "id integer PRIMARY KEY," \
             "title text NOT NULL," \
             "description text," \
-            "url text NOT NULL" \
+            "url text NOT NULL," \
+            "section text" \
             ");"
         cursor.execute(bookmarks_table)
         Sqlite._close(conn)
@@ -70,17 +71,19 @@ class Sqlite:
                     "title": record[1],
                     "description": description,
                     "url": record[3],
+                    "section": record[4],
                 }
             )
         Sqlite._close(conn)
         return bookmarks
 
-    def add_bookmark(self, title, description, url):
+    def add_bookmark(self, title, description, url, section):
         conn, cursor = self._connect()
         try:
-            cursor.execute(f"INSERT INTO {BOOKMARKS_TABLE} (title, description, url) "
+            cursor.execute(f"INSERT INTO {BOOKMARKS_TABLE} (title, description, url, section) "
                            f"VALUES ('{sql_escape(title)}', "
                            f"'{sql_escape(description)}', "
-                           f"'{sql_escape(url)}');")
+                           f"'{sql_escape(url)}', "
+                           f"'{sql_escape(section)}');")
         finally:
             Sqlite._close(conn)

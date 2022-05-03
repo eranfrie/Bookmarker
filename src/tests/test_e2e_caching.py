@@ -6,12 +6,12 @@ from tests.test_e2e_base import TestE2eBase, URL
 class TestE2eCaching(TestE2eBase):
     def test_cache(self):
         # add a bookmark
-        response = self._add_bookmark("test_title", "test_description", "http://www.test.com")
+        response = self._add_bookmark("test_title", "test_description", "http://www.test.com", "test_section")
         self._compare_num_bookmarks(response, 1)
 
         # add a bookmark directly to the DB
         # but still get one bookmark (cached)
-        self._add_bookmark_to_db("test_title", "test_description", "http://www.test.com")
+        self._add_bookmark_to_db("test_title", "test_description", "http://www.test.com", "test_section")
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 1, db_avail=False)
 
@@ -20,11 +20,11 @@ class TestE2eCaching(TestE2eBase):
         self.test_cache()
 
         # add a bookmark via API - cache should be invalidated
-        response = self._add_bookmark("test_title", "test_description", "http://www.test.com")
+        response = self._add_bookmark("test_title", "test_description", "http://www.test.com", "test_section")
         self._compare_num_bookmarks(response, 3)
 
     def test_cache_delted_db(self):
-        response = self._add_bookmark("test_title", "test_description", "http://www.test.com")
+        response = self._add_bookmark("test_title", "test_description", "http://www.test.com", "test_section")
         self._compare_num_bookmarks(response, 1)
 
         self._delete_db()
@@ -40,6 +40,6 @@ class TestE2eCaching(TestE2eBase):
 
         # making sure cache is not used after getting 0 bookmarks
         # by adding a bookmark directly to Db and sending GET again
-        self._add_bookmark_to_db("test_title", "test_description", "http://www.test.com")
+        self._add_bookmark_to_db("test_title", "test_description", "http://www.test.com", "test_section")
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 1)

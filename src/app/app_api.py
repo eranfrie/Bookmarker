@@ -48,6 +48,8 @@ class AppAPI:
                     f'size="50" value="{add_bookmark_section.last_description}"><br>' \
                     f'<input type="text" name="url" placeholder="* URL" ' \
                     f'size="50" value="{add_bookmark_section.last_url}"><br>' \
+                    f'<input type="text" name="section" placeholder="Section" ' \
+                    f'size="50" value="{add_bookmark_section.last_section}"><br>' \
                     f'<input type="submit">' \
                 f'</form>' \
                 f"<hr>"
@@ -82,6 +84,8 @@ class AppAPI:
                 bookmarks_section += f"Total: {len(display_bookmarks_section.bookmarks)}<br><br>"
 
                 for b in display_bookmarks_section.bookmarks:
+                    if b.section:
+                        bookmarks_section += f"[{b.section}] "
                     bookmarks_section += f"<b>{b.title}:</b> "
                     # description is optional
                     if b.description:
@@ -103,8 +107,10 @@ class AppAPI:
             title = request.form.get("title")
             description = request.form.get("description")
             url = request.form.get("url")
+            section = request.form.get("section")
 
-            display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(title, description, url)
+            display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(
+                    title, description, url, section)
             return _main_page(display_bookmarks_section, add_bookmark_section)
 
         @self.app_api.route(Route.IMPORT.value, methods=["GET", "POST"])

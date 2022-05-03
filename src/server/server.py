@@ -8,11 +8,13 @@ logger = logging.getLogger()
 
 
 class Bookmark:
-    def __init__(self, bookmark_id, title, description, url):
+    # pylint: disable=R0913 (too-many-arguments)
+    def __init__(self, bookmark_id, title, description, url, section):
         self.id = bookmark_id
         self.title = title
         self.description = description
         self.url = url
+        self.section = section
 
 
 class Server:
@@ -52,19 +54,21 @@ class Server:
                     j["title"],
                     j["description"],
                     j["url"],
+                    j["section"],
                 )
             )
 
         self._cache = bookmarks
         return bookmarks
 
-    def add_bookmark(self, title, description, url):
+    def add_bookmark(self, title, description, url, section):
         self._invalidate_cache()
 
         # strip input
-        title = title if title is None else title.strip()
-        description = description if description is None else description.strip()
-        url = url if url is None else url.strip()
+        title = "" if title is None else title.strip()
+        description = "" if description is None else description.strip()
+        url = "" if url is None else url.strip()
+        section = "" if section is None else section.strip()
 
         # input validation
         if not title:
@@ -75,11 +79,11 @@ class Server:
             raise URLRequiredException()
 
         try:
-            self.db.add_bookmark(title, description, url)
+            self.db.add_bookmark(title, description, url, section)
             logger.info("bookmark added successfully")
         except Exception as e:
-            logger.exception("failed to add bookmark to db: title=%s, description=%s, url=%s",
-                             title, description, url)
+            logger.exception("failed to add bookmark to db: title=%s, description=%s, url=%s, section=%s",
+                             title, description, url, section)
             raise InternalException() from e
 
     def import_bookmarks(self, filename):
@@ -101,12 +105,12 @@ class Server:
         num_failed = 0
         for b in bookmarks:
             try:
-                self.add_bookmark(b["title"], "", b["url"])
+                self.add_bookmark(b["title"], "", b["url"], b["section"])
                 num_added += 1
             # pylint: disable=W0703 (broad-except)
             except Exception:
-                logger.exception("import bookmark: failed to add bookmark: title=%s, url=%s",
-                                 b["title"], b["url"])
+                logger.exception("import bookmark: failed to add bookmark: title=%s, url=%s, section=%s",
+                                 b["title"], b["url"], b["section"])
                 num_failed += 1
 
         logger.info("import bookmarks - added=%s, failed=%s", num_added, num_failed)
