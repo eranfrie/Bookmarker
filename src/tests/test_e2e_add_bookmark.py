@@ -138,7 +138,8 @@ class TestE2eAddBookmark(TestE2eBase):
                                       "<>http://www.test.com", "<>test_section")
         self._compare_num_bookmarks(response, 1)
         assert response.text.count(app.ADD_BOOKMARK_OK_MSG) == 1
-        pattern = "&lt;&gt;test_title.*&lt;&gt;test_description.*&lt;&gt;http://www\\.test\\.com"
+        pattern = "&lt;&gt;test_section.*&lt;&gt;test_title.*" \
+            "&lt;&gt;test_description.*&lt;&gt;http://www\\.test\\.com"
         assert re.search(pattern, response.text)
 
     def test_sql_escaping(self):

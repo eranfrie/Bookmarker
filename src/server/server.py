@@ -41,6 +41,7 @@ class Server:
         for j in bookmarks_json:
             description = j["description"] if j["description"] else ""
             section = j["section"] if j["section"] else ""
+            section = section.lower()  # ignore case
             bookmarks.append(
                 Bookmark(
                     j["id"],
