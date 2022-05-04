@@ -55,12 +55,14 @@ class AppAPI:
                 f"<hr>"
             return html
 
-        def _search_form():
-            html = '<form action="/">' \
-                   '<label for="search">Search:</label>' \
-                   '<input type="search" id="pattern" name="pattern">' \
-                   '<input type="submit" value="Go">' \
-                   '</form>'
+        def _search_form(last_pattern):
+            last_pattern = last_pattern if last_pattern else ""
+            html = f'<form action="/">' \
+                   f'<label for="search">Search:</label>' \
+                   f'<input type="search" id="pattern" name="pattern" ' \
+                   f'placeholder="pattern" value="{last_pattern}">' \
+                   f'<input type="submit" value="Go">' \
+                   f'</form>'
             return html
 
         def _header():
@@ -84,14 +86,14 @@ class AppAPI:
             html += '</b></h1>'
             return html
 
-        def _main_page(display_bookmarks_section, add_bookmark_section):
+        def _main_page(display_bookmarks_section, add_bookmark_section, last_pattern):
             add_bookmark_form = _add_bookmark_form(add_bookmark_section)
 
             bookmarks_section = ""
             if display_bookmarks_section.bookmarks is not None:
                 bookmarks_section += f"Total: {len(display_bookmarks_section.bookmarks)}<br><br>"
 
-                bookmarks_section += _search_form()
+                bookmarks_section += _search_form(last_pattern)
 
                 prev_section = None
                 for b in display_bookmarks_section.bookmarks:
@@ -113,7 +115,7 @@ class AppAPI:
         def index():
             pattern = request.args.get("pattern")
             display_bookmarks_section, add_bookmark_section = self.app.display_bookmarks(pattern)
-            return _main_page(display_bookmarks_section, add_bookmark_section)
+            return _main_page(display_bookmarks_section, add_bookmark_section, pattern)
 
         @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
         def add_bookmark():
@@ -124,7 +126,7 @@ class AppAPI:
 
             display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(
                     title, description, url, section)
-            return _main_page(display_bookmarks_section, add_bookmark_section)
+            return _main_page(display_bookmarks_section, add_bookmark_section, "")
 
         @self.app_api.route(Route.IMPORT.value, methods=["GET", "POST"])
         def import_bookmarks():
