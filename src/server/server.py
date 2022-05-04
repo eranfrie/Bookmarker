@@ -17,7 +17,7 @@ class Server:
         logger.debug("invalidating cache")
         self._cache = None
 
-    def get_all_bookmarks(self):
+    def _get_all_bookmarks(self):
         """
         Returns:
             list of Bookmark objects
@@ -55,6 +55,14 @@ class Server:
         bookmarks.sort()
         self._cache = bookmarks
         return self._cache
+
+    def get_bookmarks(self, pattern):
+        bookmarks = self._get_all_bookmarks()
+        if not pattern:
+            return bookmarks
+
+        pattern = pattern.lower()
+        return [b for b in bookmarks if b.match(pattern)]
 
     def add_bookmark(self, title, description, url, section):
         self._invalidate_cache()

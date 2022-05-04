@@ -15,3 +15,13 @@ class Bookmark:
         if self.description.lower() != other.description.lower():
             return self.description.lower() < other.description.lower()
         return self.url.lower() < other.url.lower()
+
+    def match(self, pattern):
+        """
+        Assumptions:
+            pattern is not None
+            pattern already lowered
+        """
+        return pattern in self.title.lower() or \
+            pattern in self.description.lower() or \
+            pattern in self.url.lower()

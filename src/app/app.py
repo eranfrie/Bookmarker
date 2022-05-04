@@ -30,11 +30,12 @@ class App:
         self.server = server
         self.import_bookmarks_filename = Path(output_dir, IMPORT_BOOKMARKS_FILENAME)
 
-    def _main_page(self, add_bookmarks_section):
+    def _main_page(self, add_bookmarks_section, pattern):
         """Returns all information to be displayed in the main page.
 
         Args:
             add_bookmarks_section: DisplayBookmarksSection object
+            pattern (str | None): a pattern to filter results
 
         Returns:
             escaped_display_bookmarks_section:
@@ -44,7 +45,7 @@ class App:
         """
         try:
             escaped_bookmarks = []
-            for b in self.server.get_all_bookmarks():
+            for b in self.server.get_bookmarks(pattern):
                 escaped_bookmarks.append(
                     Bookmark(
                         b.id,
@@ -71,13 +72,13 @@ class App:
 
         return escaped_display_bookmarks_section, escaped_add_bookmarks_section
 
-    def display_bookmarks(self):
+    def display_bookmarks(self, pattern):
         """
         Returns all information needed to display the main page
         (see `_main_page` function).
         """
         add_bookmarks_section = AddBookmarkSection(None, None, "", "", "", "")
-        return self._main_page(add_bookmarks_section)
+        return self._main_page(add_bookmarks_section, pattern)
 
     def add_bookmark(self, title, description, url, section):
         """
@@ -90,19 +91,19 @@ class App:
         try:
             self.server.add_bookmark(title, description, url, section)
             add_bookmarks_section = AddBookmarkSection(True, ADD_BOOKMARK_OK_MSG, "", "", "", "")
-            return self._main_page(add_bookmarks_section)
+            return self._main_page(add_bookmarks_section, None)
         except InternalException:
             add_bookmarks_section = AddBookmarkSection(
                     False, ADD_BOOKMARK_ERR_MSG, title, description, url, section)
-            return self._main_page(add_bookmarks_section)
+            return self._main_page(add_bookmarks_section, None)
         except TitleRequiredException:
             add_bookmarks_section = AddBookmarkSection(
                     False, ADD_BOOKMARK_TITLE_REQUIRED_MSG, title, description, url, section)
-            return self._main_page(add_bookmarks_section)
+            return self._main_page(add_bookmarks_section, None)
         except URLRequiredException:
             add_bookmarks_section = AddBookmarkSection(
                     False, ADD_BOOKMARK_URL_REQUIRED_MSG, title, description, url, section)
-            return self._main_page(add_bookmarks_section)
+            return self._main_page(add_bookmarks_section, None)
 
     def import_bookmarks(self, bookmarks_file):
         """

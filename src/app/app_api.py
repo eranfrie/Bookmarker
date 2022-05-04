@@ -55,6 +55,14 @@ class AppAPI:
                 f"<hr>"
             return html
 
+        def _search_form():
+            html = '<form action="/">' \
+                   '<label for="search">Search:</label>' \
+                   '<input type="search" id="pattern" name="pattern">' \
+                   '<input type="submit" value="Go">' \
+                   '</form>'
+            return html
+
         def _header():
             return f'<h1 style="text-align:center">{opts.PROD_NAME}</h1>'
 
@@ -83,6 +91,8 @@ class AppAPI:
             if display_bookmarks_section.bookmarks is not None:
                 bookmarks_section += f"Total: {len(display_bookmarks_section.bookmarks)}<br><br>"
 
+                bookmarks_section += _search_form()
+
                 prev_section = None
                 for b in display_bookmarks_section.bookmarks:
                     if b.section and b.section != prev_section:
@@ -101,7 +111,8 @@ class AppAPI:
 
         @self.app_api.route(Route.INDEX.value)
         def index():
-            display_bookmarks_section, add_bookmark_section = self.app.display_bookmarks()
+            pattern = request.args.get("pattern")
+            display_bookmarks_section, add_bookmark_section = self.app.display_bookmarks(pattern)
             return _main_page(display_bookmarks_section, add_bookmark_section)
 
         @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
