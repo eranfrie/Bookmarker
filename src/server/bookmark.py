@@ -1,20 +1,26 @@
+# pylint: disable=R0902 (too-many-instance-attributes)
 class Bookmark:
     # pylint: disable=R0913 (too-many-arguments)
     def __init__(self, bookmark_id, title, description, url, section):
         self.id = bookmark_id
-        self.title = title
-        self.description = description
-        self.url = url
-        self.section = section
+        self.title = title if title else ""
+        self.description = description if description else ""
+        self.url = url if url else ""
+        self.section = section if section else ""
+
+        self.title_lower = self.title.lower()
+        self.description_lower = self.description.lower()
+        self.url_lower = self.url.lower()
+        self.section_lower = self.section.lower()
 
     def __lt__(self, other):
-        if self.section.lower() != other.section.lower():
-            return self.section.lower() < other.section.lower()
-        if self.title.lower() != other.title.lower():
-            return self.title.lower() < other.title.lower()
-        if self.description.lower() != other.description.lower():
-            return self.description.lower() < other.description.lower()
-        return self.url.lower() < other.url.lower()
+        if self.section_lower != other.section_lower:
+            return self.section_lower < other.section_lower
+        if self.title_lower != other.title_lower:
+            return self.title_lower < other.title_lower
+        if self.description_lower != other.description_lower:
+            return self.description_lower < other.description_lower
+        return self.url_lower < other.url_lower
 
     def match(self, pattern):
         """
@@ -22,6 +28,6 @@ class Bookmark:
             pattern is not None
             pattern already lowered
         """
-        return pattern in self.title.lower() or \
-            pattern in self.description.lower() or \
-            pattern in self.url.lower()
+        return pattern in self.title_lower or \
+            pattern in self.description_lower or \
+            pattern in self.url_lower
