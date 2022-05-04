@@ -1,3 +1,6 @@
+from server.fuzzy_search import is_match
+
+
 # pylint: disable=R0902 (too-many-instance-attributes)
 class Bookmark:
     # pylint: disable=R0913 (too-many-arguments)
@@ -26,8 +29,8 @@ class Bookmark:
         """
         Assumptions:
             pattern is not None
-            pattern already lowered
+            pattern is lower case
         """
-        return pattern in self.title_lower or \
-            pattern in self.description_lower or \
-            pattern in self.url_lower
+        return is_match(pattern, self.title_lower) or \
+            is_match(pattern, self.description_lower) or \
+            is_match(pattern, self.url_lower)

@@ -4,16 +4,11 @@ from server.fuzzy_search import is_match
 # pylint: disable=R0201 (no-self-use)
 class TestFuzzySearch:
     def test_match(self):
-        assert is_match("", "")
-        assert is_match("", "a")
-
-        assert is_match("abc", "ABC")
-        assert is_match("ABC", "abc")
+        assert is_match("abc", "abc")
         assert is_match("abc", "aabbccdd")
-        assert is_match("abC", "AAbbccdd")
-        assert is_match("aaabbb", "Aaa-bbB")
-        assert is_match("A", "a")
-        assert is_match("A", " -. a")
+        assert is_match("aaabbb", "aaa-bbb")
+        assert is_match("a", "a")
+        assert is_match("a", " -. a")
 
         assert is_match("123", "44142434")
         assert is_match("123", "1243")
