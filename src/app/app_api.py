@@ -99,9 +99,14 @@ class AppAPI:
 
                 prev_section = None
                 for b in display_bookmarks_section.bookmarks:
-                    title = highlight(b.escaped_chars_title, b.title_indexes)
-                    description = highlight(b.escaped_chars_description, b.description_indexes)
-                    url = highlight(b.escaped_chars_url, b.url_indexes)
+                    if last_pattern:
+                        title = highlight(b.escaped_chars_title, b.title_indexes)
+                        description = highlight(b.escaped_chars_description, b.description_indexes)
+                        url = highlight(b.escaped_chars_url, b.url_indexes)
+                    else:
+                        title = b.escaped_title
+                        description = b.escaped_description
+                        url = b.escaped_url
                     if b.section and b.section != prev_section:
                         prev_section = b.section
                         bookmarks_section += f"<br><u><b><b>{b.escaped_section}</b></u><br>"

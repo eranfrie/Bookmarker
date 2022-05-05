@@ -210,3 +210,18 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value, params={"pattern": "last_search_pattern<>"})
         assert 'value="last_search_pattern&lt;&gt;"' in response.text
         assert response.text.count("mark") == 3  # 3 because of Bookmarker header, etc
+
+    def test_clear_search_no_highlight(self):
+        self._add_bookmark_to_db("test_title_1", "test_description_1",
+                                 "https://www.test_1.com", "test_section_1")
+        response = requests.get(URL.INDEX.value)
+        self._compare_num_bookmarks(response, 1)
+
+        pattern = "test_title_1"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        self._compare_num_bookmarks(response, 1)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
+
+        response = requests.get(URL.INDEX.value)
+        self._compare_num_bookmarks(response, 1)
+        assert response.text.count("mark") == 3  # 3 because of Bookmarker header, etc
