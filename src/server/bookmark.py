@@ -10,7 +10,7 @@ class Bookmark:
         self.title = title if title else ""
         self.description = description if description else ""
         self.url = url if url else ""
-        self.section = section if section else ""
+        self.section = section.lower() if section else ""  # section always lower case
 
         # don't be sensitive around / separators
         sub_sections = self.section.split("/")
@@ -33,10 +33,13 @@ class Bookmark:
         assert len(self.escaped_chars_description) == len(self.description)
         self.escaped_chars_url = split_escaped_text(self.escaped_url)
         assert len(self.escaped_chars_url) == len(self.url)
+        self.escaped_chars_section = split_escaped_text(self.escaped_section)
+        assert len(self.escaped_chars_section) == len(self.section)
 
         self.title_indexes = None
         self.description_indexes = None
         self.url_indexes = None
+        self.section_indexes = None
 
     def __lt__(self, other):
         if self.section_lower != other.section_lower:
@@ -56,6 +59,7 @@ class Bookmark:
         self.title_indexes = is_match(pattern, self.title_lower)
         self.description_indexes = is_match(pattern, self.description_lower)
         self.url_indexes = is_match(pattern, self.url_lower)
+        self.section_indexes = is_match(pattern, self.section_lower)
         return self.title_indexes is not None or \
             self.description_indexes is not None or \
             self.url_indexes is not None

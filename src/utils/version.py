@@ -4,7 +4,7 @@ from utils import paths
 
 
 MAJOR = 1
-MINOR = 0
+MINOR = 1
 
 
 def get_patch():

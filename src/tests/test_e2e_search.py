@@ -225,3 +225,14 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 1)
         assert response.text.count("mark") == 3  # 3 because of Bookmarker header, etc
+
+    def test_highlight_section(self):
+        self._add_bookmark_to_db("test_highlight", "",
+                                 "https://www.test_1.com", "test_highlight")
+        response = requests.get(URL.INDEX.value)
+        self._compare_num_bookmarks(response, 1)
+
+        pattern = "testhghlgt"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        self._compare_num_bookmarks(response, 1)
+        assert response.text.count("mark") == len(pattern) * 2 * 2 + 3  # 3 because of Bookmarker header, etc

@@ -103,13 +103,16 @@ class AppAPI:
                         title = highlight(b.escaped_chars_title, b.title_indexes)
                         description = highlight(b.escaped_chars_description, b.description_indexes)
                         url = highlight(b.escaped_chars_url, b.url_indexes)
+                        section = highlight(b.escaped_chars_section, b.section_indexes)
                     else:
                         title = b.escaped_title
                         description = b.escaped_description
                         url = b.escaped_url
+                        section = b.escaped_section
+
                     if b.section and b.section != prev_section:
                         prev_section = b.section
-                        bookmarks_section += f"<br><u><b><b>{b.escaped_section}</b></u><br>"
+                        bookmarks_section += f"<br><u><b><b>{section}</b></u><br>"
                     bookmarks_section += f"<b>{title}:</b> "
                     # description is optional
                     if b.description:
