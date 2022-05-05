@@ -52,3 +52,16 @@ class TestE2eSections(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
         assert response.text.count("est_section") == 1
+
+    def test_section_slash_separator(self):
+        self._add_bookmark_to_db("test_title", "test_description",
+                                 "http://www.test.com", "Test_section/sub_section")
+        self._add_bookmark_to_db("test_title", "test_description",
+                                 "http://www.test.com", "test_section / sub_section")
+        self._add_bookmark_to_db("test_title", "test_description",
+                                 "http://www.test.com", "test_section/ sub_section")
+        self._add_bookmark_to_db("test_title", "test_description",
+                                 "http://www.test.com", "test_section /sub_section")
+        response = requests.get(URL.INDEX.value)
+        self._compare_num_bookmarks(response, 4)
+        assert response.text.count("sub_section") == 1

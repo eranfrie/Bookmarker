@@ -12,6 +12,11 @@ class Bookmark:
         self.url = url if url else ""
         self.section = section if section else ""
 
+        # don't be sensitive around / separators
+        sub_sections = self.section.split("/")
+        sub_sections = [s.strip() for s in sub_sections]
+        self.section = " / ".join(sub_sections)
+
         self.title_lower = self.title.lower()
         self.description_lower = self.description.lower()
         self.url_lower = self.url.lower()
