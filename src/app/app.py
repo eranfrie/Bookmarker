@@ -1,10 +1,8 @@
 from pathlib import Path
 import logging
 
-from flask import escape
-
+from utils.html_utils import html_escape
 from server.server_api import InternalException, TitleRequiredException, URLRequiredException
-from server.bookmark import Bookmark
 from app.app_sections import DisplayBookmarksSection, AddBookmarkSection
 
 
@@ -17,12 +15,6 @@ ADD_BOOKMARK_URL_REQUIRED_MSG = "Error: URL is a required field"
 IMPORT_BOOKMARKS_FILENAME = "tmp_bookmarks.html"
 
 logger = logging.getLogger()
-
-
-def html_escape(text):
-    if not text:
-        return text
-    return escape(text)
 
 
 class App:
@@ -38,27 +30,16 @@ class App:
             pattern (str | None): a pattern to filter results
 
         Returns:
-            escaped_display_bookmarks_section:
-                DisplayBookmarksSection object after escaping the relevant fields
+            display_bookmarks_section:
+                DisplayBookmarksSection object
             escaped_add_bookmarks_section:
                 AddBookmarkSection object after escaping the relevant fields
         """
         try:
-            escaped_bookmarks = []
-            for b in self.server.get_bookmarks(pattern):
-                escaped_bookmarks.append(
-                    Bookmark(
-                        b.id,
-                        html_escape(b.title),
-                        html_escape(b.description),
-                        html_escape(b.url),
-                        html_escape(b.section)
-                    )
-                )
-
-            escaped_display_bookmarks_section = DisplayBookmarksSection(escaped_bookmarks, None)
+            bookmarks = self.server.get_bookmarks(pattern)
+            display_bookmarks_section = DisplayBookmarksSection(bookmarks, None)
         except InternalException:
-            escaped_display_bookmarks_section = DisplayBookmarksSection(None, GET_BOOKMARKS_ERR_MSG)
+            display_bookmarks_section = DisplayBookmarksSection(None, GET_BOOKMARKS_ERR_MSG)
 
         # escape add_bookmarks_section
         escaped_add_bookmarks_section = AddBookmarkSection(
@@ -70,7 +51,7 @@ class App:
             html_escape(add_bookmarks_section.last_section)
         )
 
-        return escaped_display_bookmarks_section, escaped_add_bookmarks_section
+        return display_bookmarks_section, escaped_add_bookmarks_section
 
     def display_bookmarks(self, pattern):
         """

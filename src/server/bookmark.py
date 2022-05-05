@@ -1,3 +1,4 @@
+from utils.html_utils import html_escape
 from server.fuzzy_search import is_match
 
 
@@ -15,6 +16,11 @@ class Bookmark:
         self.description_lower = self.description.lower()
         self.url_lower = self.url.lower()
         self.section_lower = self.section.lower()
+
+        self.escaped_title = html_escape(self.title)
+        self.escaped_description = html_escape(self.description)
+        self.escaped_url = html_escape(self.url)
+        self.escaped_section = html_escape(self.section)
 
     def __lt__(self, other):
         if self.section_lower != other.section_lower:

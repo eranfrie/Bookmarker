@@ -4,7 +4,7 @@ from enum import Enum
 from flask import Flask, request
 
 from utils import opts, version
-from app.app import html_escape
+from utils.html_utils import html_escape
 
 
 logger = logging.getLogger()
@@ -101,12 +101,12 @@ class AppAPI:
                 for b in display_bookmarks_section.bookmarks:
                     if b.section and b.section != prev_section:
                         prev_section = b.section
-                        bookmarks_section += f"<br><u><b><b>{b.section}</b></u><br>"
-                    bookmarks_section += f"<b>{b.title}:</b> "
+                        bookmarks_section += f"<br><u><b><b>{b.escaped_section}</b></u><br>"
+                    bookmarks_section += f"<b>{b.escaped_title}:</b> "
                     # description is optional
                     if b.description:
-                        bookmarks_section += f"{b.description} "
-                    bookmarks_section += f"<a href={b.url} target=\"_blank\">{b.url}</a><br>"
+                        bookmarks_section += f"{b.escaped_description} "
+                    bookmarks_section += f"<a href={b.escaped_url} target=\"_blank\">{b.escaped_url}</a><br>"
             else:
                 bookmarks_section = \
                     f'<div style="color:red">{display_bookmarks_section.display_bookmarks_err}</div>'
