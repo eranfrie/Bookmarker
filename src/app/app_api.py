@@ -4,6 +4,7 @@ from enum import Enum
 from flask import Flask, request
 
 from utils import opts, version
+from app.app import html_escape
 
 
 logger = logging.getLogger()
@@ -57,6 +58,7 @@ class AppAPI:
 
         def _search_form(last_pattern):
             last_pattern = last_pattern if last_pattern else ""
+            last_pattern = html_escape(last_pattern)
             html = f'<form action="/">' \
                    f'<label for="search">Search:</label>' \
                    f'<input type="search" id="pattern" name="pattern" ' \
