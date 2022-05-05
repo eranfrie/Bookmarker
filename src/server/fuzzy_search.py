@@ -7,14 +7,18 @@ def is_match(pattern, line):
         line is lower case
 
     Returns:
-        True if pattern is "fuzzy" contained in line
-        False otherwise
+        indexes (set) of matched indexes
+            if pattern is "fuzzy" contained in line
+        None otherwise
     """
+    indexes = set()
+
     pattern_index = 0
-    for letter in line:
+    for i, letter in enumerate(line):
         if pattern[pattern_index] == letter:
+            indexes.add(i)
             pattern_index += 1
             if len(pattern) == pattern_index:
-                return True
+                return indexes
 
-    return False
+    return None

@@ -12,8 +12,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "test_title_1"})
+        pattern = "test_title_1"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_complete_match_description(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -23,8 +25,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "test_description_1"})
+        pattern = "test_description_1"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_complete_match_url(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -34,8 +38,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "test_1.com"})
+        pattern = "test_1.com"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_fuzzy_title(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -45,8 +51,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "testtitle1"})
+        pattern = "testtitle1"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_fuzzy_description(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -56,8 +64,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "tstdescription_1"})
+        pattern = "tstdescription_1"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_fuzzy_url(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -67,8 +77,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "test1com"})
+        pattern = "test1com"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_fuzzy_ignore_case_title(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -78,8 +90,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "TESTtitle1"})
+        pattern = "TESTtitle1"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_fuzzy_ignore_case_description(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -89,8 +103,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "TSTdescription_1"})
+        pattern = "TSTdescription_1"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_fuzzy_ignore_case_url(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -100,8 +116,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "TEST1com"})
+        pattern = "TEST1com"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_html_escaping_title(self):
         self._add_bookmark_to_db("<>test_title_1", "test_description_1",
@@ -111,8 +129,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "<>TESTtitle1"})
+        pattern = "<>TESTtitle1"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_html_escaping_description(self):
         self._add_bookmark_to_db("test_title_1", "<>test_description_1",
@@ -122,8 +142,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "<>TSTdescription_1"})
+        pattern = "<>TSTdescription1"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_html_escaping_url(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -133,8 +155,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "TEST1<>com"})
+        pattern = "TEST1<>com"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_sql_escaping_title(self):
         self._add_bookmark_to_db("\"'test_title_1", "test_description_1",
@@ -144,8 +168,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "\"'TESTtitle1"})
+        pattern = "\"'TESTtitle1"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_sql_escaping_description(self):
         self._add_bookmark_to_db("test_title_1", "\"'test_description_1",
@@ -155,8 +181,10 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "\"'TSTdescription_1"})
+        pattern = "\"'TSTdescription_1"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     def test_sql_escaping_url(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -166,15 +194,19 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
 
-        response = requests.get(URL.INDEX.value, params={"pattern": "TEST1\"'com"})
+        pattern = "TEST1\"'com"
+        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark") == len(pattern) * 2 + 3  # 3 because of Bookmarker header, etc
 
     # pylint: disable=R0201 (no-self-use)
     def test_last_search_in_input_field(self):
         response = requests.get(URL.INDEX.value, params={"pattern": "last_search_pattern"})
         assert 'value="last_search_pattern"' in response.text
+        assert response.text.count("mark") == 3  # 3 because of Bookmarker header, etc
 
     # pylint: disable=R0201 (no-self-use)
     def test_last_search_in_input_field_escaped(self):
         response = requests.get(URL.INDEX.value, params={"pattern": "last_search_pattern<>"})
         assert 'value="last_search_pattern&lt;&gt;"' in response.text
+        assert response.text.count("mark") == 3  # 3 because of Bookmarker header, etc
