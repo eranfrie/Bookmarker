@@ -4,7 +4,7 @@ from enum import Enum
 from flask import Flask, request
 
 from utils import opts, version
-from utils.html_utils import html_escape, highlight
+from utils.html_utils import highlight
 
 
 logger = logging.getLogger()
@@ -12,6 +12,7 @@ logger = logging.getLogger()
 
 class Route (Enum):
     INDEX = "/"
+    BOOKMARKS = "/bookmarks"
     ADD_BOOKMARK = "/add_bookmark"
     IMPORT = "/import"
     ABOUT = "/about"
@@ -56,16 +57,23 @@ class AppAPI:
                 f"<hr>"
             return html
 
-        def _search_form(last_pattern):
-            last_pattern = last_pattern if last_pattern else ""
-            last_pattern = html_escape(last_pattern)
-            html = f'<form action="/">' \
-                   f'<label for="search">Search:</label>' \
-                   f'<input type="search" id="pattern" name="pattern" ' \
-                   f'placeholder="pattern" value="{last_pattern}">' \
-                   f'<input type="submit" value="Go">' \
-                   f'</form>'
-            return html
+        def _search_section():
+            return """
+                <br>
+                Search: <input type="search" id="searchBookmark" placeholder="pattern">
+                <br><br>
+
+                <script type="text/javascript">
+                  searchBookmark.addEventListener("input", function (e) {
+                    const xhttp = new XMLHttpRequest();
+                    xhttp.onload = function() {
+                      document.getElementById("bookmarks_div").innerHTML = this.responseText;
+                    }
+                    xhttp.open("GET", "/bookmarks?pattern=" + this.value);
+                    xhttp.send();
+                  });
+                </script>
+            """
 
         def _header():
             return f'<h1 style="text-align:center">{opts.PROD_NAME}</h1>'
@@ -88,14 +96,11 @@ class AppAPI:
             html += '</b></h1>'
             return html
 
-        def _main_page(display_bookmarks_section, add_bookmark_section, last_pattern):
-            add_bookmark_form = _add_bookmark_form(add_bookmark_section)
+        def _bookmarks_section(display_bookmarks_section, last_pattern):
+            bookmarks_section = '<div id="bookmarks_div">'
 
-            bookmarks_section = ""
             if display_bookmarks_section.bookmarks is not None:
                 bookmarks_section += f"Total: {len(display_bookmarks_section.bookmarks)}<br><br>"
-
-                bookmarks_section += _search_form(last_pattern)
 
                 prev_section = None
                 for b in display_bookmarks_section.bookmarks:
@@ -122,7 +127,22 @@ class AppAPI:
                 bookmarks_section = \
                     f'<div style="color:red">{display_bookmarks_section.display_bookmarks_err}</div>'
 
-            return _header() + _menu(Page.HOME) + add_bookmark_form + bookmarks_section
+            bookmarks_section += '<br></div>'
+
+            return bookmarks_section
+
+        @self.app_api.route(Route.BOOKMARKS.value)
+        def bookmark():
+            pattern = request.args.get("pattern")
+            display_bookmarks_section, _ = self.app.display_bookmarks(pattern)
+            return _bookmarks_section(display_bookmarks_section, pattern)
+
+        def _main_page(display_bookmarks_section, add_bookmark_section, last_pattern):
+            return _header() + \
+                _menu(Page.HOME) + \
+                _add_bookmark_form(add_bookmark_section) + \
+                _search_section() + \
+                _bookmarks_section(display_bookmarks_section, last_pattern)
 
         @self.app_api.route(Route.INDEX.value)
         def index():

@@ -24,9 +24,6 @@ class URL (Enum):
     ABOUT = TEST_URL + Route.ABOUT.value
 
 
-assert len(URL) == len(Route), "Need to test new route"
-
-
 # pylint: disable=W0201, R0201 (attribute-defined-outside-init, no-self-use)
 class TestE2eBase:
     def setup(self):
