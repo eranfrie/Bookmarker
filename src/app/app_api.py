@@ -5,6 +5,7 @@ from flask import Flask, request
 
 from utils import opts, version
 from utils.html_utils import highlight
+from app.app_sections import StatusMsg
 
 
 logger = logging.getLogger()
@@ -40,9 +41,6 @@ class AppAPI:
 
         def _add_bookmark_form(add_bookmark_section):
             html = '<h4>Add a new bookmark</h4>'
-            if add_bookmark_section.last_op_succeeded in (True, False):
-                color = "green" if add_bookmark_section.last_op_succeeded else "red"
-                html += f'<div style="color:{color}">{add_bookmark_section.last_op_msg}</div>'
             html += f'<form action="/add_bookmark" method="post">' \
                     f'<input type="text" name="title" placeholder="* Title" ' \
                     f'size="50" value="{add_bookmark_section.last_title}"><br>' \
@@ -131,15 +129,21 @@ class AppAPI:
 
             return bookmarks_section
 
+        def _status_msg_section(status_msg):
+            if not status_msg:
+                return ""
+            return f'<div style="color:{status_msg.color}">{status_msg.msg}</div>'
+
         @self.app_api.route(Route.BOOKMARKS.value)
         def bookmark():
             pattern = request.args.get("pattern")
             display_bookmarks_section, _ = self.app.display_bookmarks(pattern)
             return _bookmarks_section(display_bookmarks_section, pattern)
 
-        def _main_page(display_bookmarks_section, add_bookmark_section, last_pattern):
+        def _main_page(status_msg, display_bookmarks_section, add_bookmark_section, last_pattern):
             return _header() + \
                 _menu(Page.HOME) + \
+                _status_msg_section(status_msg) + \
                 _add_bookmark_form(add_bookmark_section) + \
                 _search_section() + \
                 _bookmarks_section(display_bookmarks_section, last_pattern)
@@ -148,7 +152,7 @@ class AppAPI:
         def index():
             pattern = request.args.get("pattern")
             display_bookmarks_section, add_bookmark_section = self.app.display_bookmarks(pattern)
-            return _main_page(display_bookmarks_section, add_bookmark_section, pattern)
+            return _main_page(None, display_bookmarks_section, add_bookmark_section, pattern)
 
         @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
         def add_bookmark():
@@ -159,7 +163,9 @@ class AppAPI:
 
             display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(
                     title, description, url, section)
-            return _main_page(display_bookmarks_section, add_bookmark_section, "")
+            color = "green" if add_bookmark_section.last_op_succeeded else "red"
+            status_msg = StatusMsg(color, add_bookmark_section.last_op_msg)
+            return _main_page(status_msg, display_bookmarks_section, add_bookmark_section, "")
 
         @self.app_api.route(Route.IMPORT.value, methods=["GET", "POST"])
         def import_bookmarks():

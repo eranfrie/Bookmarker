@@ -38,3 +38,9 @@ class AddBookmarkSection:
         self.last_description = last_description
         self.last_url = last_url
         self.last_section = last_section
+
+
+class StatusMsg:
+    def __init__(self, color, msg):
+        self.color = color
+        self.msg = msg
