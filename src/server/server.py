@@ -118,3 +118,18 @@ class Server:
 
         logger.info("import bookmarks - added=%s, failed=%s", num_added, num_failed)
         return num_added, num_failed
+
+    def delete_bookmark(self, bookmark_id):
+        """
+        Returns:
+            bool: whether delete succeeded or not
+        """
+        self._invalidate_cache()
+
+        try:
+            logger.info("requested to delete bookmark_id %s", bookmark_id)
+            bookmark_id = int(bookmark_id)
+            return self.db.delete_bookmark(bookmark_id)
+        except Exception as e:
+            logger.exception("failed to delete bookmark_id %s", bookmark_id)
+            return False

@@ -20,6 +20,7 @@ NUM_MENU_LINKS = len(page_to_route) - 1
 class URL (Enum):
     INDEX = TEST_URL + Route.INDEX.value
     ADD_BOOKMARK = TEST_URL + Route.ADD_BOOKMARK.value
+    DELETE_BOOKMARK = TEST_URL + Route.DELETE_BOOKMARK.value
     IMPORT = TEST_URL + Route.IMPORT.value
     ABOUT = TEST_URL + Route.ABOUT.value
 
@@ -57,7 +58,8 @@ class TestE2eBase:
 
     def _compare_num_bookmarks(self, response, expected_num_bookmarks, db_avail=True):
         assert response.status_code == 200
-        assert response.text.count("href") == expected_num_bookmarks + NUM_MENU_LINKS
+        assert response.text.count("href") == \
+                expected_num_bookmarks + NUM_MENU_LINKS + response.text.count("font-awesome.min.css")
         if db_avail:
             assert f"Total: {expected_num_bookmarks}" in response.text
             assert self._count_bookmarks_in_db() == expected_num_bookmarks

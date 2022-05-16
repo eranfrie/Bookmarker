@@ -15,6 +15,7 @@ class Route (Enum):
     INDEX = "/"
     BOOKMARKS = "/bookmarks"
     ADD_BOOKMARK = "/add_bookmark"
+    DELETE_BOOKMARK = "/delete_bookmark"
     IMPORT = "/import"
     ABOUT = "/about"
 
@@ -98,6 +99,34 @@ class AppAPI:
             bookmarks_section = '<div id="bookmarks_div">'
 
             if display_bookmarks_section.bookmarks is not None:
+                # icon library
+                bookmarks_section += '<link rel="stylesheet" ' \
+                    'href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">'
+                # delete bookmark function
+                bookmarks_section += """
+                    <script>
+                      function deleteBookmark(bookmark_id)
+                      {
+                        if (confirm('Delete bookmark?')) {
+                          var delete_form = document.createElement('form');
+                          delete_form.action='/delete_bookmark';
+                          delete_form.method='POST';
+
+                          var inpt=document.createElement('input');
+                          inpt.type='hidden';
+                          inpt.name='bookmark_id';
+                          inpt.value=bookmark_id
+                          delete_form.appendChild(inpt);
+
+                          document.body.appendChild(delete_form);
+                          delete_form.submit();
+                        } else {
+                          return False
+                        }
+                      }
+                    </script>
+                """
+
                 bookmarks_section += f"Total: {len(display_bookmarks_section.bookmarks)}<br><br>"
 
                 prev_section = None
@@ -116,6 +145,9 @@ class AppAPI:
                     if b.section and b.section != prev_section:
                         prev_section = b.section
                         bookmarks_section += f"<br><u><b><b>{section}</b></u><br>"
+
+                    bookmarks_section += f'<button class="btn" onclick="deleteBookmark({b.id})">' \
+                        '<i class="fa fa-trash"></i></button> '
                     bookmarks_section += f"<b>{title}:</b> "
                     # description is optional
                     if b.description:
@@ -165,6 +197,12 @@ class AppAPI:
                     title, description, url, section)
             color = "green" if add_bookmark_section.last_op_succeeded else "red"
             status_msg = StatusMsg(color, add_bookmark_section.last_op_msg)
+            return _main_page(status_msg, display_bookmarks_section, add_bookmark_section, "")
+
+        @self.app_api.route(Route.DELETE_BOOKMARK.value, methods=["POST"])
+        def delete_bookmark():
+            bookmark_id = request.form.get("bookmark_id")
+            status_msg, display_bookmarks_section, add_bookmark_section = self.app.delete_bookmark(bookmark_id)
             return _main_page(status_msg, display_bookmarks_section, add_bookmark_section, "")
 
         @self.app_api.route(Route.IMPORT.value, methods=["GET", "POST"])

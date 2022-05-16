@@ -3,7 +3,7 @@ import logging
 
 from utils.html_utils import html_escape
 from server.server_api import InternalException, TitleRequiredException, URLRequiredException
-from app.app_sections import DisplayBookmarksSection, AddBookmarkSection
+from app.app_sections import DisplayBookmarksSection, AddBookmarkSection, StatusMsg
 
 
 GET_BOOKMARKS_ERR_MSG = "Internal error. Please try again later"
@@ -11,6 +11,9 @@ ADD_BOOKMARK_ERR_MSG = "Internal error: Failed to add a new bookmark. Please try
 ADD_BOOKMARK_OK_MSG = "Bookmark added successfully"
 ADD_BOOKMARK_TITLE_REQUIRED_MSG = "Error: Title is a required field"
 ADD_BOOKMARK_URL_REQUIRED_MSG = "Error: URL is a required field"
+
+DELETE_BOOKMARK_OK_MSG = "Bookmark deleted successfully"
+DELETE_BOOKMARK_ERR_MSG = "Failed to delete bookmark"
 
 IMPORT_BOOKMARKS_FILENAME = "tmp_bookmarks.html"
 
@@ -105,3 +108,14 @@ class App:
         except Exception:
             logger.exception("failed to import bookmarks")
             return True, None, None
+
+    def delete_bookmark(self, bookmark_id):
+        if self.server.delete_bookmark(bookmark_id):
+            status_msg = StatusMsg("green", DELETE_BOOKMARK_OK_MSG)
+        else:
+            logger.error("failed to delete bookmark %s", bookmark_id)
+            status_msg = StatusMsg("red", DELETE_BOOKMARK_ERR_MSG)
+
+        add_section = AddBookmarkSection(None, None, "", "", "", "")
+        display_section, add_section = self._main_page(add_section, None)
+        return status_msg, display_section, add_section

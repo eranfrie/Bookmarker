@@ -87,3 +87,17 @@ class Sqlite:
                            f"'{sql_escape(section)}');")
         finally:
             Sqlite._close(conn)
+
+    def delete_bookmark(self, bookmark_id):
+        """
+        Args:
+            bookmark_id (int): no need to escapse
+        """
+        rows_deleted = 0
+        conn, cursor = self._connect()
+        try:
+            cursor.execute(f"DELETE FROM {BOOKMARKS_TABLE} WHERE id=?;", (bookmark_id, ))
+            rows_deleted = cursor.rowcount
+        finally:
+            Sqlite._close(conn)
+        return rows_deleted == 1
