@@ -130,6 +130,7 @@ class Server:
             logger.info("requested to delete bookmark_id %s", bookmark_id)
             bookmark_id = int(bookmark_id)
             return self.db.delete_bookmark(bookmark_id)
-        except Exception as e:
+        # pylint: disable=W0703 (broad-except)
+        except Exception:
             logger.exception("failed to delete bookmark_id %s", bookmark_id)
             return False

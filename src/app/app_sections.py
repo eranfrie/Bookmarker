@@ -40,7 +40,7 @@ class AddBookmarkSection:
         self.last_section = last_section
 
 
-class StatusMsg:
+class StatusSection:
     def __init__(self, color, msg):
         self.color = color
         self.msg = msg

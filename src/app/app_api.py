@@ -5,7 +5,7 @@ from flask import Flask, request
 
 from utils import opts, version
 from utils.html_utils import highlight
-from app.app_sections import StatusMsg
+from app.app_sections import StatusSection
 
 
 logger = logging.getLogger()
@@ -101,7 +101,8 @@ class AppAPI:
             if display_bookmarks_section.bookmarks is not None:
                 # icon library
                 bookmarks_section += '<link rel="stylesheet" ' \
-                    'href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">'
+                    'href="https://cdnjs.cloudflare.com' \
+                    '/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">'
                 # delete bookmark function
                 bookmarks_section += """
                     <script>
@@ -161,10 +162,10 @@ class AppAPI:
 
             return bookmarks_section
 
-        def _status_msg_section(status_msg):
-            if not status_msg:
+        def _status_section(status_section):
+            if not status_section:
                 return ""
-            return f'<div style="color:{status_msg.color}">{status_msg.msg}</div>'
+            return f'<div style="color:{status_section.color}">{status_section.msg}</div>'
 
         @self.app_api.route(Route.BOOKMARKS.value)
         def bookmark():
@@ -172,10 +173,10 @@ class AppAPI:
             display_bookmarks_section, _ = self.app.display_bookmarks(pattern)
             return _bookmarks_section(display_bookmarks_section, pattern)
 
-        def _main_page(status_msg, display_bookmarks_section, add_bookmark_section, last_pattern):
+        def _main_page(status_section, display_bookmarks_section, add_bookmark_section, last_pattern):
             return _header() + \
                 _menu(Page.HOME) + \
-                _status_msg_section(status_msg) + \
+                _status_section(status_section) + \
                 _add_bookmark_form(add_bookmark_section) + \
                 _search_section() + \
                 _bookmarks_section(display_bookmarks_section, last_pattern)
@@ -196,14 +197,14 @@ class AppAPI:
             display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(
                     title, description, url, section)
             color = "green" if add_bookmark_section.last_op_succeeded else "red"
-            status_msg = StatusMsg(color, add_bookmark_section.last_op_msg)
-            return _main_page(status_msg, display_bookmarks_section, add_bookmark_section, "")
+            status_section = StatusSection(color, add_bookmark_section.last_op_msg)
+            return _main_page(status_section, display_bookmarks_section, add_bookmark_section, "")
 
         @self.app_api.route(Route.DELETE_BOOKMARK.value, methods=["POST"])
         def delete_bookmark():
             bookmark_id = request.form.get("bookmark_id")
-            status_msg, display_bookmarks_section, add_bookmark_section = self.app.delete_bookmark(bookmark_id)
-            return _main_page(status_msg, display_bookmarks_section, add_bookmark_section, "")
+            status_section, display_section, add_section = self.app.delete_bookmark(bookmark_id)
+            return _main_page(status_section, display_section, add_section, "")
 
         @self.app_api.route(Route.IMPORT.value, methods=["GET", "POST"])
         def import_bookmarks():

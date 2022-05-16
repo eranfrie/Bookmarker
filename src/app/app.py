@@ -3,7 +3,7 @@ import logging
 
 from utils.html_utils import html_escape
 from server.server_api import InternalException, TitleRequiredException, URLRequiredException
-from app.app_sections import DisplayBookmarksSection, AddBookmarkSection, StatusMsg
+from app.app_sections import DisplayBookmarksSection, AddBookmarkSection, StatusSection
 
 
 GET_BOOKMARKS_ERR_MSG = "Internal error. Please try again later"
@@ -111,11 +111,11 @@ class App:
 
     def delete_bookmark(self, bookmark_id):
         if self.server.delete_bookmark(bookmark_id):
-            status_msg = StatusMsg("green", DELETE_BOOKMARK_OK_MSG)
+            status_section = StatusSection("green", DELETE_BOOKMARK_OK_MSG)
         else:
             logger.error("failed to delete bookmark %s", bookmark_id)
-            status_msg = StatusMsg("red", DELETE_BOOKMARK_ERR_MSG)
+            status_section = StatusSection("red", DELETE_BOOKMARK_ERR_MSG)
 
         add_section = AddBookmarkSection(None, None, "", "", "", "")
         display_section, add_section = self._main_page(add_section, None)
-        return status_msg, display_section, add_section
+        return status_section, display_section, add_section
