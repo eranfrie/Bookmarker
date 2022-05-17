@@ -25,69 +25,56 @@ class App:
         self.server = server
         self.import_bookmarks_filename = Path(output_dir, IMPORT_BOOKMARKS_FILENAME)
 
-    def _main_page(self, add_bookmarks_section, pattern):
-        """Returns all information to be displayed in the main page.
-
+    def display_bookmarks(self, pattern):
+        """
         Args:
-            add_bookmarks_section: DisplayBookmarksSection object
             pattern (str | None): a pattern to filter results
 
         Returns:
-            display_bookmarks_section:
-                DisplayBookmarksSection object
-            escaped_add_bookmarks_section:
-                AddBookmarkSection object after escaping the relevant fields
+            display_bookmarks_section: DisplayBookmarksSection object
         """
         try:
             bookmarks = self.server.get_bookmarks(pattern)
-            display_bookmarks_section = DisplayBookmarksSection(bookmarks, None)
+            return DisplayBookmarksSection(bookmarks, None)
         except InternalException:
-            display_bookmarks_section = DisplayBookmarksSection(None, GET_BOOKMARKS_ERR_MSG)
-
-        # escape add_bookmarks_section
-        escaped_add_bookmarks_section = AddBookmarkSection(
-            add_bookmarks_section.last_op_succeeded,
-            add_bookmarks_section.last_op_msg,
-            html_escape(add_bookmarks_section.last_title),
-            html_escape(add_bookmarks_section.last_description),
-            html_escape(add_bookmarks_section.last_url),
-            html_escape(add_bookmarks_section.last_section)
-        )
-
-        return display_bookmarks_section, escaped_add_bookmarks_section
-
-    def display_bookmarks(self, pattern):
-        """
-        Returns all information needed to display the main page
-        (see `_main_page` function).
-        """
-        add_bookmarks_section = AddBookmarkSection(None, None, "", "", "", "")
-        return self._main_page(add_bookmarks_section, pattern)
+            return DisplayBookmarksSection(None, GET_BOOKMARKS_ERR_MSG)
 
     def add_bookmark(self, title, description, url, section):
-        """
-        Returns all information needed to display the main page
-        (see `_main_page` function).
-        """
         logger.info("got request to add bookmark: title=%s, desc=%s, url=%s, section=%s",
                     title, description, url, section)
 
         try:
             self.server.add_bookmark(title, description, url, section)
-            add_bookmarks_section = AddBookmarkSection(True, ADD_BOOKMARK_OK_MSG, "", "", "", "")
-            return self._main_page(add_bookmarks_section, None)
+            add_bookmark_section = AddBookmarkSection("", "", "", "")
+            status_section = StatusSection("green", ADD_BOOKMARK_OK_MSG)
         except InternalException:
-            add_bookmarks_section = AddBookmarkSection(
-                    False, ADD_BOOKMARK_ERR_MSG, title, description, url, section)
-            return self._main_page(add_bookmarks_section, None)
+            add_bookmark_section = AddBookmarkSection(title, description, url, section)
+            status_section = StatusSection("red", ADD_BOOKMARK_ERR_MSG)
         except TitleRequiredException:
-            add_bookmarks_section = AddBookmarkSection(
-                    False, ADD_BOOKMARK_TITLE_REQUIRED_MSG, title, description, url, section)
-            return self._main_page(add_bookmarks_section, None)
+            add_bookmark_section = AddBookmarkSection(title, description, url, section)
+            status_section = StatusSection("red", ADD_BOOKMARK_TITLE_REQUIRED_MSG)
         except URLRequiredException:
-            add_bookmarks_section = AddBookmarkSection(
-                    False, ADD_BOOKMARK_URL_REQUIRED_MSG, title, description, url, section)
-            return self._main_page(add_bookmarks_section, None)
+            add_bookmark_section = AddBookmarkSection(title, description, url, section)
+            status_section = StatusSection("red", ADD_BOOKMARK_URL_REQUIRED_MSG)
+
+        # escape add_bookmark_section
+        escaped_add_bookmarks_section = AddBookmarkSection(
+            html_escape(add_bookmark_section.last_title),
+            html_escape(add_bookmark_section.last_description),
+            html_escape(add_bookmark_section.last_url),
+            html_escape(add_bookmark_section.last_section)
+        )
+
+        return status_section, self.display_bookmarks(None), escaped_add_bookmarks_section
+
+    def delete_bookmark(self, bookmark_id):
+        if self.server.delete_bookmark(bookmark_id):
+            status_section = StatusSection("green", DELETE_BOOKMARK_OK_MSG)
+        else:
+            logger.error("failed to delete bookmark %s", bookmark_id)
+            status_section = StatusSection("red", DELETE_BOOKMARK_ERR_MSG)
+
+        return status_section, self.display_bookmarks(None)
 
     def import_bookmarks(self, bookmarks_file):
         """
@@ -108,14 +95,3 @@ class App:
         except Exception:
             logger.exception("failed to import bookmarks")
             return True, None, None
-
-    def delete_bookmark(self, bookmark_id):
-        if self.server.delete_bookmark(bookmark_id):
-            status_section = StatusSection("green", DELETE_BOOKMARK_OK_MSG)
-        else:
-            logger.error("failed to delete bookmark %s", bookmark_id)
-            status_section = StatusSection("red", DELETE_BOOKMARK_ERR_MSG)
-
-        add_section = AddBookmarkSection(None, None, "", "", "", "")
-        display_section, add_section = self._main_page(add_section, None)
-        return status_section, display_section, add_section

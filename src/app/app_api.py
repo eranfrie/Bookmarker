@@ -5,7 +5,7 @@ from flask import Flask, request
 
 from utils import opts, version
 from utils.html_utils import highlight
-from app.app_sections import StatusSection
+from app.app_sections import AddBookmarkSection
 
 
 logger = logging.getLogger()
@@ -41,6 +41,9 @@ class AppAPI:
         self.app_api = Flask(__name__)
 
         def _add_bookmark_form(add_bookmark_section):
+            if not add_bookmark_section:
+                add_bookmark_section = AddBookmarkSection("", "", "", "")
+
             html = '<h4>Add a new bookmark</h4>'
             html += f'<form action="/add_bookmark" method="post">' \
                     f'<input type="text" name="title" placeholder="* Title" ' \
@@ -170,8 +173,7 @@ class AppAPI:
         @self.app_api.route(Route.BOOKMARKS.value)
         def bookmark():
             pattern = request.args.get("pattern")
-            display_bookmarks_section, _ = self.app.display_bookmarks(pattern)
-            return _bookmarks_section(display_bookmarks_section, pattern)
+            return _bookmarks_section(self.app.display_bookmarks(pattern), pattern)
 
         def _main_page(status_section, display_bookmarks_section, add_bookmark_section, last_pattern):
             return _header() + \
@@ -184,8 +186,7 @@ class AppAPI:
         @self.app_api.route(Route.INDEX.value)
         def index():
             pattern = request.args.get("pattern")
-            display_bookmarks_section, add_bookmark_section = self.app.display_bookmarks(pattern)
-            return _main_page(None, display_bookmarks_section, add_bookmark_section, pattern)
+            return _main_page(None, self.app.display_bookmarks(pattern), None, pattern)
 
         @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
         def add_bookmark():
@@ -194,17 +195,15 @@ class AppAPI:
             url = request.form.get("url")
             section = request.form.get("section")
 
-            display_bookmarks_section, add_bookmark_section = self.app.add_bookmark(
-                    title, description, url, section)
-            color = "green" if add_bookmark_section.last_op_succeeded else "red"
-            status_section = StatusSection(color, add_bookmark_section.last_op_msg)
+            status_section, display_bookmarks_section, add_bookmark_section = \
+                self.app.add_bookmark(title, description, url, section)
             return _main_page(status_section, display_bookmarks_section, add_bookmark_section, "")
 
         @self.app_api.route(Route.DELETE_BOOKMARK.value, methods=["POST"])
         def delete_bookmark():
             bookmark_id = request.form.get("bookmark_id")
-            status_section, display_section, add_section = self.app.delete_bookmark(bookmark_id)
-            return _main_page(status_section, display_section, add_section, "")
+            status_section, display_section = self.app.delete_bookmark(bookmark_id)
+            return _main_page(status_section, display_section, None, "")
 
         @self.app_api.route(Route.IMPORT.value, methods=["GET", "POST"])
         def import_bookmarks():

@@ -30,10 +30,7 @@ class AddBookmarkSection:
         last_section (str | ""): section to be displayed in the "add bookmark" input field.
             empty string ("") to display the placeholder.
     """
-    # pylint: disable=R0913 (too-many-arguments)
-    def __init__(self, last_op_succeeded, last_op_msg, last_title, last_description, last_url, last_section):
-        self.last_op_succeeded = last_op_succeeded
-        self.last_op_msg = last_op_msg
+    def __init__(self, last_title, last_description, last_url, last_section):
         self.last_title = last_title
         self.last_description = last_description
         self.last_url = last_url
