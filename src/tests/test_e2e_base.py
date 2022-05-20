@@ -19,6 +19,7 @@ NUM_MENU_LINKS = len(page_to_route) - 1
 
 class URL (Enum):
     INDEX = TEST_URL + Route.INDEX.value
+    BOOKMARKS = TEST_URL + Route.BOOKMARKS.value
     ADD_BOOKMARK = TEST_URL + Route.ADD_BOOKMARK.value
     DELETE_BOOKMARK = TEST_URL + Route.DELETE_BOOKMARK.value
     IMPORT = TEST_URL + Route.IMPORT.value
