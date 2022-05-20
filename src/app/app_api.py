@@ -35,10 +35,13 @@ assert len(Page) == len(page_to_route)
 
 
 class AppAPI:
-    # pylint: disable=R0915 (too-many-statements)
+    # pylint: disable=R0915, R0914 (too-many-statements, too-many-locals)
     def __init__(self, app):
         self.app = app
         self.app_api = Flask(__name__)
+
+        def _status_to_color(status):
+            return "green" if status.success else "red"
 
         def _add_bookmark_form(add_bookmark_section):
             if not add_bookmark_section:
@@ -176,7 +179,7 @@ class AppAPI:
         def _status_section(status_section):
             if not status_section:
                 return ""
-            return f'<div style="color:{status_section.color}">{status_section.msg}</div>'
+            return f'<div style="color:{_status_to_color(status_section)}">{status_section.msg}</div>'
 
         def _main_page(status_section, display_bookmarks_section, add_bookmark_section):
             return _header() + \

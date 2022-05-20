@@ -38,6 +38,6 @@ class AddBookmarkSection:
 
 
 class StatusSection:
-    def __init__(self, color, msg):
-        self.color = color
+    def __init__(self, success, msg):
+        self.success = success
         self.msg = msg

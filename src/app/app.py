@@ -59,16 +59,16 @@ class App:
         try:
             self.server.add_bookmark(title, description, url, section)
             add_bookmark_section = AddBookmarkSection("", "", "", "")
-            status_section = StatusSection("green", ADD_BOOKMARK_OK_MSG)
+            status_section = StatusSection(True, ADD_BOOKMARK_OK_MSG)
         except InternalException:
             add_bookmark_section = AddBookmarkSection(title, description, url, section)
-            status_section = StatusSection("red", ADD_BOOKMARK_ERR_MSG)
+            status_section = StatusSection(False, ADD_BOOKMARK_ERR_MSG)
         except TitleRequiredException:
             add_bookmark_section = AddBookmarkSection(title, description, url, section)
-            status_section = StatusSection("red", ADD_BOOKMARK_TITLE_REQUIRED_MSG)
+            status_section = StatusSection(False, ADD_BOOKMARK_TITLE_REQUIRED_MSG)
         except URLRequiredException:
             add_bookmark_section = AddBookmarkSection(title, description, url, section)
-            status_section = StatusSection("red", ADD_BOOKMARK_URL_REQUIRED_MSG)
+            status_section = StatusSection(False, ADD_BOOKMARK_URL_REQUIRED_MSG)
 
         # escape add_bookmark_section
         escaped_add_bookmarks_section = AddBookmarkSection(
@@ -82,10 +82,10 @@ class App:
 
     def delete_bookmark(self, bookmark_id):
         if self.server.delete_bookmark(bookmark_id):
-            status_section = StatusSection("green", DELETE_BOOKMARK_OK_MSG)
+            status_section = StatusSection(True, DELETE_BOOKMARK_OK_MSG)
         else:
             logger.error("failed to delete bookmark %s", bookmark_id)
-            status_section = StatusSection("red", DELETE_BOOKMARK_ERR_MSG)
+            status_section = StatusSection(False, DELETE_BOOKMARK_ERR_MSG)
 
         return status_section, self.display_bookmarks(None)
 
