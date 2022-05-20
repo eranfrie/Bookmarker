@@ -74,6 +74,13 @@ class AppAPI:
                     xhttp.open("GET", "/bookmarks?pattern=" + this.value);
                     xhttp.send();
                   });
+
+                  window.onkeydown = function(e) {
+                    if (e.keyCode == 65 && e.ctrlKey) {
+                      document.getElementById("searchBookmark").focus();
+                      document.getElementById("searchBookmark").select();
+                    }
+                  }
                 </script>
             """
 
