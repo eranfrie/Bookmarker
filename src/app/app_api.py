@@ -116,6 +116,11 @@ class AppAPI:
                 # delete bookmark function
                 bookmarks_section += """
                     <script>
+                      function copyURL(url)
+                      {
+                        navigator.clipboard.writeText(url);
+                      }
+
                       function deleteBookmark(bookmark_id)
                       {
                         if (confirm('Delete bookmark?')) {
@@ -157,6 +162,8 @@ class AppAPI:
                         prev_section = b.section
                         bookmarks_section += f"<br><u><b><b>{section}</b></u><br>"
 
+                    bookmarks_section += f'<button class="btn" onclick="copyURL(\'{b.escaped_url}\')">' \
+                        '<i class="fa fa-copy"></i></button> '
                     bookmarks_section += f'<button class="btn" onclick="deleteBookmark({b.id})">' \
                         '<i class="fa fa-trash"></i></button> '
                     bookmarks_section += f"<b>{title}:</b> "
