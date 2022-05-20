@@ -35,6 +35,19 @@ class App:
         """
         try:
             bookmarks = self.server.get_bookmarks(pattern)
+
+            # clean last search
+            if not pattern:
+                for b in bookmarks:
+                    if b.title_indexes:
+                        b.title_indexes.clear()
+                    if b.description_indexes:
+                        b.description_indexes.clear()
+                    if b.url_indexes:
+                        b.url_indexes.clear()
+                    if b.section_indexes:
+                        b.section_indexes.clear()
+
             return DisplayBookmarksSection(bookmarks, None)
         except InternalException:
             return DisplayBookmarksSection(None, GET_BOOKMARKS_ERR_MSG)

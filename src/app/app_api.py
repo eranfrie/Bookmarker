@@ -105,7 +105,7 @@ class AppAPI:
             html += '</b></h1>'
             return html
 
-        def _bookmarks_section(display_bookmarks_section, last_pattern):
+        def _bookmarks_section(display_bookmarks_section):
             bookmarks_section = '<div id="bookmarks_div">'
 
             if display_bookmarks_section.bookmarks is not None:
@@ -147,16 +147,10 @@ class AppAPI:
 
                 prev_section = None
                 for b in display_bookmarks_section.bookmarks:
-                    if last_pattern:
-                        title = highlight(b.escaped_chars_title, b.title_indexes)
-                        description = highlight(b.escaped_chars_description, b.description_indexes)
-                        url = highlight(b.escaped_chars_url, b.url_indexes)
-                        section = highlight(b.escaped_chars_section, b.section_indexes)
-                    else:
-                        title = b.escaped_title
-                        description = b.escaped_description
-                        url = b.escaped_url
-                        section = b.escaped_section
+                    title = highlight(b.escaped_chars_title, b.title_indexes)
+                    description = highlight(b.escaped_chars_description, b.description_indexes)
+                    url = highlight(b.escaped_chars_url, b.url_indexes)
+                    section = highlight(b.escaped_chars_section, b.section_indexes)
 
                     if b.section and b.section != prev_section:
                         prev_section = b.section
@@ -184,23 +178,23 @@ class AppAPI:
                 return ""
             return f'<div style="color:{status_section.color}">{status_section.msg}</div>'
 
-        @self.app_api.route(Route.BOOKMARKS.value)
-        def bookmark():
-            pattern = request.args.get("pattern")
-            return _bookmarks_section(self.app.display_bookmarks(pattern), pattern)
-
-        def _main_page(status_section, display_bookmarks_section, add_bookmark_section, last_pattern):
+        def _main_page(status_section, display_bookmarks_section, add_bookmark_section):
             return _header() + \
                 _menu(Page.HOME) + \
                 _status_section(status_section) + \
                 _add_bookmark_form(add_bookmark_section) + \
                 _search_section() + \
-                _bookmarks_section(display_bookmarks_section, last_pattern)
+                _bookmarks_section(display_bookmarks_section)
+
+        @self.app_api.route(Route.BOOKMARKS.value)
+        def bookmark():
+            pattern = request.args.get("pattern")
+            return _bookmarks_section(self.app.display_bookmarks(pattern))
 
         @self.app_api.route(Route.INDEX.value)
         def index():
             pattern = request.args.get("pattern")
-            return _main_page(None, self.app.display_bookmarks(pattern), None, pattern)
+            return _main_page(None, self.app.display_bookmarks(pattern), None)
 
         @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
         def add_bookmark():
@@ -211,13 +205,13 @@ class AppAPI:
 
             status_section, display_bookmarks_section, add_bookmark_section = \
                 self.app.add_bookmark(title, description, url, section)
-            return _main_page(status_section, display_bookmarks_section, add_bookmark_section, "")
+            return _main_page(status_section, display_bookmarks_section, add_bookmark_section)
 
         @self.app_api.route(Route.DELETE_BOOKMARK.value, methods=["POST"])
         def delete_bookmark():
             bookmark_id = request.form.get("bookmark_id")
             status_section, display_section = self.app.delete_bookmark(bookmark_id)
-            return _main_page(status_section, display_section, None, "")
+            return _main_page(status_section, display_section, None)
 
         @self.app_api.route(Route.IMPORT.value, methods=["GET", "POST"])
         def import_bookmarks():
