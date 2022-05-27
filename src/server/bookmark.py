@@ -2,6 +2,25 @@ from utils.html_utils import html_escape, split_escaped_text
 from server.fuzzy_search import is_match
 
 
+def _regular_search(pattern, line):
+    """
+    Assumptions:
+        pattern is not None
+        pattern is lower case
+        line is lower case
+
+    Returns:
+        indexes (set) of matched indexes
+            if pattern is "fuzzy" contained in line
+        None otherwise
+    """
+    try:
+        first_indes = line.index(pattern)
+    except ValueError:
+        return None
+    return set(range(first_indes, first_indes + len(pattern)))
+
+
 # pylint: disable=R0902 (too-many-instance-attributes)
 class Bookmark:
     # pylint: disable=R0913 (too-many-arguments)
@@ -50,16 +69,17 @@ class Bookmark:
             return self.description_lower < other.description_lower
         return self.url_lower < other.url_lower
 
-    def match(self, pattern, include_url):
+    def match(self, pattern, is_fuzzy, include_url):
         """
         Assumptions:
             pattern is not None
             pattern is lower case
         """
-        self.title_indexes = is_match(pattern, self.title_lower)
-        self.description_indexes = is_match(pattern, self.description_lower)
-        self.url_indexes = is_match(pattern, self.url_lower)
-        self.section_indexes = is_match(pattern, self.section_lower)
+        search_method = is_match if is_fuzzy else _regular_search
+        self.title_indexes = search_method(pattern, self.title_lower)
+        self.description_indexes = search_method(pattern, self.description_lower)
+        self.url_indexes = search_method(pattern, self.url_lower)
+        self.section_indexes = search_method(pattern, self.section_lower)
         return self.title_indexes is not None or \
             self.description_indexes is not None or \
             (self.url_indexes is not None and include_url)

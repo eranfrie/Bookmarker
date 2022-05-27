@@ -9,6 +9,7 @@ from app.app_sections import AddBookmarkSection
 
 
 INC_URL_DEFAULT = "false"
+IS_FUZZY_DEFAULT = "true"
 
 logger = logging.getLogger()
 
@@ -69,6 +70,9 @@ class AppAPI:
                 <br>
                 Search: <input type="search" id="searchBookmark" placeholder="pattern"><br>
 
+                <input type="checkbox" id="fuzzy" checked>
+                <label for="fuzzy"> Fuzzy search</label><br>
+
                 <input type="checkbox" id="includeurl">
                 <label for="includeurl"> Include URL</label><br>
 
@@ -76,13 +80,16 @@ class AppAPI:
 
                 <script type="text/javascript">
                   searchBookmark.addEventListener("input", function (e) {
+                    fuzzy = document.getElementById("fuzzy").checked;
                     include_url = document.getElementById("includeurl").checked;
 
                     const xhttp = new XMLHttpRequest();
                     xhttp.onload = function() {
                       document.getElementById("bookmarks_div").innerHTML = this.responseText;
                     }
-                    xhttp.open("GET", "/bookmarks?pattern=" + this.value + "&includeurl=" + include_url);
+                    xhttp.open("GET", "/bookmarks?pattern=" + this.value +
+                      "&fuzzy=" + fuzzy +
+                      "&includeurl=" + include_url);
                     xhttp.send();
                   });
 
@@ -200,16 +207,20 @@ class AppAPI:
         @self.app_api.route(Route.BOOKMARKS.value)
         def bookmark():
             pattern = request.args.get("pattern")
+            is_fuzzy = request.args.get("fuzzy", IS_FUZZY_DEFAULT)
+            is_fuzzy = is_fuzzy.lower() == "true"
             include_url = request.args.get("includeurl", INC_URL_DEFAULT)
             include_url = include_url.lower() == "true"
-            return _bookmarks_section(self.app.display_bookmarks(pattern, include_url))
+            return _bookmarks_section(self.app.display_bookmarks(pattern, is_fuzzy, include_url))
 
         @self.app_api.route(Route.INDEX.value)
         def index():
             pattern = request.args.get("pattern")
+            is_fuzzy = request.args.get("fuzzy", IS_FUZZY_DEFAULT)
+            is_fuzzy = is_fuzzy.lower() == "true"
             include_url = request.args.get("includeurl", INC_URL_DEFAULT)
             include_url = include_url.lower() == "true"
-            return _main_page(None, self.app.display_bookmarks(pattern, include_url), None)
+            return _main_page(None, self.app.display_bookmarks(pattern, is_fuzzy, include_url), None)
 
         @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
         def add_bookmark():

@@ -254,3 +254,31 @@ class TestE2eSearch(TestE2eBase):
         response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1)
         assert response.text.count("mark>") == len(pattern) * 2 * 2
+
+    def test_regular_search(self):
+        self._add_bookmark_to_db("test_title_1", "test_description_1",
+                                 "https://www.test_1.com", "test_section_1")
+        self._add_bookmark_to_db("test_title_2", "test_description_2",
+                                 "https://www.test_2.com", "test_section_2")
+        response = requests.get(URL.INDEX.value)
+        self._compare_num_bookmarks(response, 2)
+
+        pattern = "test_title_1"
+        params = {"pattern": pattern, "includeurl": "true", "fuzzy": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
+        self._compare_num_bookmarks(response, 1, db_avail=False)
+        assert response.text.count("mark>") == len(pattern) * 2
+
+    def test_regular_search_no_match(self):
+        self._add_bookmark_to_db("test_title_1", "test_description_1",
+                                 "https://www.test_1.com", "test_section_1")
+        self._add_bookmark_to_db("test_title_2", "test_description_2",
+                                 "https://www.test_2.com", "test_section_2")
+        response = requests.get(URL.INDEX.value)
+        self._compare_num_bookmarks(response, 2)
+
+        pattern = "tsttitle1"
+        params = {"pattern": pattern, "includeurl": "true", "fuzzy": "false"}
+        response = requests.get(URL.INDEX.value, params=params)
+        self._compare_num_bookmarks(response, 0, db_avail=False)
+        assert response.text.count("mark>") == 0
