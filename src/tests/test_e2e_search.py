@@ -13,7 +13,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "test_title_1"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -26,7 +27,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "test_description_1"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -39,9 +41,23 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "test_1.com"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
+
+    def test_include_url(self):
+        self._add_bookmark_to_db("test_title_1", "test_description_1",
+                                 "https://www.test_1.com", "test_section_1")
+        self._add_bookmark_to_db("test_title_2", "test_description_2",
+                                 "https://www.test_2.com", "test_section_2")
+        response = requests.get(URL.INDEX.value)
+        self._compare_num_bookmarks(response, 2)
+
+        pattern = "test_1.com"
+        params = {"pattern": pattern, "includeurl": "false"}
+        response = requests.get(URL.INDEX.value, params=params)
+        self._compare_num_bookmarks(response, 0, db_avail=False)
 
     def test_fuzzy_title(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -52,7 +68,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "testtitle1"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -65,7 +82,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "tstdescription_1"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -78,7 +96,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "test1com"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -91,7 +110,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "TESTtitle1"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -104,7 +124,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "TSTdescription_1"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -117,7 +138,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "TEST1com"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -130,7 +152,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "<>TESTtitle1"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -143,7 +166,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "<>TSTdescription1"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -156,7 +180,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "TEST1<>com"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -169,7 +194,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "\"'TESTtitle1"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -182,7 +208,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "\"'TSTdescription_1"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -195,7 +222,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 2)
 
         pattern = "TEST1\"'com"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1, db_avail=False)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -206,7 +234,8 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 1)
 
         pattern = "test_title_1"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1)
         assert response.text.count("mark>") == len(pattern) * 2
 
@@ -221,6 +250,7 @@ class TestE2eSearch(TestE2eBase):
         self._compare_num_bookmarks(response, 1)
 
         pattern = "testhghlgt"
-        response = requests.get(URL.INDEX.value, params={"pattern": pattern})
+        params = {"pattern": pattern, "includeurl": "true"}
+        response = requests.get(URL.INDEX.value, params=params)
         self._compare_num_bookmarks(response, 1)
         assert response.text.count("mark>") == len(pattern) * 2 * 2

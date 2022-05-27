@@ -56,13 +56,13 @@ class Server:
         self._cache = bookmarks
         return self._cache
 
-    def get_bookmarks(self, pattern):
+    def get_bookmarks(self, pattern, include_url):
         bookmarks = self._get_all_bookmarks()
         if not pattern:
             return bookmarks
 
         pattern = pattern.lower()
-        return [b for b in bookmarks if b.match(pattern)]
+        return [b for b in bookmarks if b.match(pattern, include_url)]
 
     def add_bookmark(self, title, description, url, section):
         self._invalidate_cache()

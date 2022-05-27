@@ -50,7 +50,7 @@ class Bookmark:
             return self.description_lower < other.description_lower
         return self.url_lower < other.url_lower
 
-    def match(self, pattern):
+    def match(self, pattern, include_url):
         """
         Assumptions:
             pattern is not None
@@ -62,4 +62,4 @@ class Bookmark:
         self.section_indexes = is_match(pattern, self.section_lower)
         return self.title_indexes is not None or \
             self.description_indexes is not None or \
-            self.url_indexes is not None
+            (self.url_indexes is not None and include_url)

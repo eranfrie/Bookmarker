@@ -25,16 +25,17 @@ class App:
         self.server = server
         self.import_bookmarks_filename = Path(output_dir, IMPORT_BOOKMARKS_FILENAME)
 
-    def display_bookmarks(self, pattern):
+    def display_bookmarks(self, pattern, include_url):
         """
         Args:
             pattern (str | None): a pattern to filter results
+            include_url (bool): whether to filter by URL too
 
         Returns:
             display_bookmarks_section: DisplayBookmarksSection object
         """
         try:
-            bookmarks = self.server.get_bookmarks(pattern)
+            bookmarks = self.server.get_bookmarks(pattern, include_url)
 
             # clean last search
             if not pattern:
@@ -78,7 +79,7 @@ class App:
             html_escape(add_bookmark_section.last_section)
         )
 
-        return status_section, self.display_bookmarks(None), escaped_add_bookmarks_section
+        return status_section, self.display_bookmarks(None, None), escaped_add_bookmarks_section
 
     def delete_bookmark(self, bookmark_id):
         if self.server.delete_bookmark(bookmark_id):
@@ -87,7 +88,7 @@ class App:
             logger.error("failed to delete bookmark %s", bookmark_id)
             status_section = StatusSection(False, DELETE_BOOKMARK_ERR_MSG)
 
-        return status_section, self.display_bookmarks(None)
+        return status_section, self.display_bookmarks(None, None)
 
     def import_bookmarks(self, bookmarks_file):
         """

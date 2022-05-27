@@ -8,6 +8,8 @@ from utils.html_utils import highlight
 from app.app_sections import AddBookmarkSection
 
 
+INC_URL_DEFAULT = "false"
+
 logger = logging.getLogger()
 
 
@@ -65,16 +67,22 @@ class AppAPI:
         def _search_section():
             return """
                 <br>
-                Search: <input type="search" id="searchBookmark" placeholder="pattern">
-                <br><br>
+                Search: <input type="search" id="searchBookmark" placeholder="pattern"><br>
+
+                <input type="checkbox" id="includeurl">
+                <label for="includeurl"> Include URL</label><br>
+
+                <br>
 
                 <script type="text/javascript">
                   searchBookmark.addEventListener("input", function (e) {
+                    include_url = document.getElementById("includeurl").checked;
+
                     const xhttp = new XMLHttpRequest();
                     xhttp.onload = function() {
                       document.getElementById("bookmarks_div").innerHTML = this.responseText;
                     }
-                    xhttp.open("GET", "/bookmarks?pattern=" + this.value);
+                    xhttp.open("GET", "/bookmarks?pattern=" + this.value + "&includeurl=" + include_url);
                     xhttp.send();
                   });
 
@@ -192,12 +200,16 @@ class AppAPI:
         @self.app_api.route(Route.BOOKMARKS.value)
         def bookmark():
             pattern = request.args.get("pattern")
-            return _bookmarks_section(self.app.display_bookmarks(pattern))
+            include_url = request.args.get("includeurl", INC_URL_DEFAULT)
+            include_url = include_url.lower() == "true"
+            return _bookmarks_section(self.app.display_bookmarks(pattern, include_url))
 
         @self.app_api.route(Route.INDEX.value)
         def index():
             pattern = request.args.get("pattern")
-            return _main_page(None, self.app.display_bookmarks(pattern), None)
+            include_url = request.args.get("includeurl", INC_URL_DEFAULT)
+            include_url = include_url.lower() == "true"
+            return _main_page(None, self.app.display_bookmarks(pattern, include_url), None)
 
         @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
         def add_bookmark():
