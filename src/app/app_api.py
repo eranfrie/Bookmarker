@@ -60,7 +60,7 @@ class AppAPI:
                     f'size="50" value="{add_bookmark_section.last_url}"><br>' \
                     f'<input type="text" name="section" placeholder="Section" ' \
                     f'size="50" value="{add_bookmark_section.last_section}"><br>' \
-                    f'<input type="submit">' \
+                    f'<input onclick="this.form.submit();this.disabled = true;" type="submit">' \
                 f'</form>' \
                 f"<hr>"
             return html
