@@ -79,7 +79,9 @@ class AppAPI:
                 <br>
 
                 <script type="text/javascript">
-                  searchBookmark.addEventListener("input", function (e) {
+                  function searchEvent()
+                  {
+                    pattern = document.getElementById("searchBookmark").value;
                     fuzzy = document.getElementById("fuzzy").checked;
                     include_url = document.getElementById("includeurl").checked;
 
@@ -87,11 +89,15 @@ class AppAPI:
                     xhttp.onload = function() {
                       document.getElementById("bookmarks_div").innerHTML = this.responseText;
                     }
-                    xhttp.open("GET", "/bookmarks?pattern=" + this.value +
+                    xhttp.open("GET", "/bookmarks?pattern=" + pattern +
                       "&fuzzy=" + fuzzy +
                       "&includeurl=" + include_url);
                     xhttp.send();
-                  });
+                  }
+
+                  fuzzy.addEventListener("input", searchEvent);
+                  includeurl.addEventListener("input", searchEvent);
+                  searchBookmark.addEventListener("input", searchEvent);
 
                   window.onkeydown = function(e) {
                     if (e.keyCode == 65 && e.ctrlKey) {
