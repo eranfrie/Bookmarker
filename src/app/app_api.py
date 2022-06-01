@@ -109,10 +109,12 @@ class AppAPI:
             """
 
         def _header():
-            return f'<h1 style="text-align:center">{opts.PROD_NAME}</h1>'
+            return f'<h1 style="text-align:center">' \
+                   f'<a href="/" style="color:black; text-decoration: none;">{opts.PROD_NAME}</a>' \
+                   f'</h1>'
 
         def _menu(curr_page):
-            html = '<p  style="text-align:center"><b>'
+            html = '<p style="text-align:center"><b>'
 
             first_page = True
             for page, url in page_to_route.items():

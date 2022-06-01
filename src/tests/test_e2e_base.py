@@ -14,7 +14,7 @@ from app.app_api import page_to_route, Route
 OUTPUT_DIR = "tmp"
 DB_FILENAME = "bookmarks.db"
 TEST_URL = "http://localhost:8000"
-NUM_MENU_LINKS = len(page_to_route) - 1
+NUM_MENU_LINKS = len(page_to_route)
 
 
 class URL (Enum):
