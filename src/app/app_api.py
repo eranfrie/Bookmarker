@@ -46,7 +46,7 @@ class AppAPI:
         def _status_to_color(status):
             return "green" if status.success else "red"
 
-        def _add_bookmark_form(add_bookmark_section):
+        def _add_bookmark_form(add_bookmark_section, sections):
             if not add_bookmark_section:
                 add_bookmark_section = AddBookmarkSection("", "", "", "")
 
@@ -58,11 +58,15 @@ class AppAPI:
                     f'size="50" value="{add_bookmark_section.last_description}"><br>' \
                     f'<input type="text" name="url" placeholder="* URL" ' \
                     f'size="50" value="{add_bookmark_section.last_url}"><br>' \
-                    f'<input type="text" name="section" placeholder="Section" ' \
+                    f'<input type="text" name="section" list="sections" placeholder="Section" ' \
                     f'size="50" value="{add_bookmark_section.last_section}"><br>' \
-                    f'<input onclick="this.form.submit();this.disabled = true;" type="submit">' \
-                f'</form>' \
-                f"<hr>"
+                    f'<datalist id="sections">'
+            for s in sections:
+                html += f'<option>{s}</option>'
+            html += '</datalist>' \
+                '<input onclick="this.form.submit();this.disabled = true;" type="submit">' \
+                '</form>' \
+                "<hr>"
             return html
 
         def _search_section():
@@ -205,10 +209,21 @@ class AppAPI:
             return f'<div style="color:{_status_to_color(status_section)}">{status_section.msg}</div>'
 
         def _main_page(status_section, display_bookmarks_section, add_bookmark_section):
+            # prepare list of sections
+            sections = []
+            if display_bookmarks_section.bookmarks:
+                prev_section = None
+                for b in display_bookmarks_section.bookmarks:
+                    if b.section != prev_section:
+                        if not b.section:
+                            continue
+                        prev_section = b.section
+                        sections.append(b.section)
+
             return _header() + \
                 _menu(Page.HOME) + \
                 _status_section(status_section) + \
-                _add_bookmark_form(add_bookmark_section) + \
+                _add_bookmark_form(add_bookmark_section, sections) + \
                 _search_section() + \
                 _bookmarks_section(display_bookmarks_section)
 

@@ -24,9 +24,9 @@ class TestE2eSections(TestE2eBase):
 
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 5)
-        assert response.text.count("test_section_1") == 1
-        assert response.text.count("test_section_2") == 1
-        assert response.text.count("test_section_3") == 1
+        assert response.text.count("test_section_1") == 2
+        assert response.text.count("test_section_2") == 2
+        assert response.text.count("test_section_3") == 2
 
     def test_no_section_first(self):
         self._add_bookmark("test_title_3", "test_description",
@@ -51,7 +51,7 @@ class TestE2eSections(TestE2eBase):
 
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 2)
-        assert response.text.count("est_section") == 1
+        assert response.text.count("test_section") == 2
 
     def test_section_slash_separator(self):
         self._add_bookmark_to_db("test_title", "test_description",
@@ -64,4 +64,4 @@ class TestE2eSections(TestE2eBase):
                                  "http://www.test.com", "test_section /sub_section")
         response = requests.get(URL.INDEX.value)
         self._compare_num_bookmarks(response, 4)
-        assert response.text.count("sub_section") == 1
+        assert response.text.count("test_section / sub_section") == 2
