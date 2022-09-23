@@ -11,7 +11,7 @@ def _regular_search(pattern, line):
 
     Returns:
         indexes (set) of matched indexes
-            if pattern is "fuzzy" contained in line
+            if pattern is contained in line
         None otherwise
     """
     try:

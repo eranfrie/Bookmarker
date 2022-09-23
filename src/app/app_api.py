@@ -52,14 +52,14 @@ class AppAPI:
 
             html = '<h4>Add a new bookmark</h4>'
             html += f'<form action="/add_bookmark" method="post">' \
+                    f'<input type="text" name="section" list="sections" placeholder="Section" ' \
+                    f'size="50" value="{add_bookmark_section.last_section}"><br>' \
                     f'<input type="text" name="title" placeholder="* Title" ' \
                     f'size="50" value="{add_bookmark_section.last_title}"><br>' \
                     f'<input type="text" name="description" placeholder="Description" ' \
                     f'size="50" value="{add_bookmark_section.last_description}"><br>' \
                     f'<input type="text" name="url" placeholder="* URL" ' \
                     f'size="50" value="{add_bookmark_section.last_url}"><br>' \
-                    f'<input type="text" name="section" list="sections" placeholder="Section" ' \
-                    f'size="50" value="{add_bookmark_section.last_section}"><br>' \
                     f'<datalist id="sections">'
             for s in sections:
                 html += f'<option>{s}</option>'
