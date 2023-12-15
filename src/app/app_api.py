@@ -104,9 +104,15 @@ class AppAPI:
                   searchBookmark.addEventListener("input", searchEvent);
 
                   window.onkeydown = function(e) {
+                    // ctrl-b - set focus on search input
                     if (e.keyCode == 66 && e.ctrlKey) {
                       document.getElementById("searchBookmark").focus();
                       document.getElementById("searchBookmark").select();
+                    }
+                    // ESC - reset search
+                    else if (e.key === "Escape") {
+                      document.getElementById("searchBookmark").value = '';
+                      searchEvent()
                     }
                   }
                 </script>
