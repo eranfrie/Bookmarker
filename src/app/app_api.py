@@ -39,8 +39,9 @@ assert len(Page) == len(page_to_route)
 
 class AppAPI:
     # pylint: disable=R0915, R0914 (too-many-statements, too-many-locals)
-    def __init__(self, app):
+    def __init__(self, app, default_fuzzy_search):
         self.app = app
+        self.default_fuzzy_search = default_fuzzy_search
         self.app_api = Flask(__name__)
 
         def _status_to_color(status):
@@ -70,11 +71,15 @@ class AppAPI:
             return html
 
         def _search_section():
+            checked = "checked" if self.default_fuzzy_search else ""
+            fuzzy_checkbox = f'<input type="checkbox" id="fuzzy" {checked}>'
             return """
                 <br>
                 Search: <input type="search" id="searchBookmark" placeholder="pattern"><br>
 
-                <input type="checkbox" id="fuzzy" checked>
+                """ \
+                + fuzzy_checkbox + \
+                """
                 <label for="fuzzy"> Fuzzy search</label><br>
 
                 <input type="checkbox" id="includeurl">

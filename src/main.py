@@ -47,7 +47,7 @@ def main(override_config):
     db = Sqlite(db_filename)
     server = Server(db)
     app = App(server, output_dir)
-    AppAPI(app).run(conf["host"], conf["port"])  # blocking
+    AppAPI(app, conf["default_fuzzy_search"]).run(conf["host"], conf["port"])  # blocking
 
 
 if __name__ == "__main__":

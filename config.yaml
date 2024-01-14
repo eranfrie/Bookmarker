@@ -3,5 +3,7 @@ output_dir: output/
 
 console_log_level: INFO
 
+default_fuzzy_search: true
+
 host: localhost
 port: 8000
