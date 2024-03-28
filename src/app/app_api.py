@@ -147,7 +147,8 @@ class AppAPI:
             return html
 
         def _bookmarks_section(display_bookmarks_section):
-            bookmarks_section = '<div id="bookmarks_div">'
+            bookmarks_section = '<body style="overflow-wrap: break-word;">'
+            bookmarks_section += '<div id="bookmarks_div">'
 
             if display_bookmarks_section.bookmarks is not None:
                 # icon library
@@ -212,6 +213,7 @@ class AppAPI:
 
             bookmarks_section += '<br></div>'
 
+            bookmarks_section += '</body>'
             return bookmarks_section
 
         def _status_section(status_section):
