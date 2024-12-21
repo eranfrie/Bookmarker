@@ -25,11 +25,12 @@ The tool has a strong search capabilities which enable you to easily and quickly
 - Fuzzy search: It supports a fuzzy search (can be turned off/on)
 so you don't have to remember the exact name or description of the bookmark.
 
-- Search-as-you-type: Bookmarks are filtered as you type and matching characters are highlighted
-(sections are also highlighted however search doesn't work on them).
+- Search-as-you-type: Bookmarks are filtered as you type.
 
-- URLs can be very long which makes fuzzy search inefficient. Therefore there is a `Include URL` option
-(if turned off, matching characters in URLs are still highlighted however URLs don't affect search results).
+- URLs can be very long which makes fuzzy search inefficient. Therefore there is a `Include URL` option.
+
+- Multi-line search: each line is matched independently
+(AND relation between the lines), either in a fuzzy or a full-match fashion.
 
 #### Import bookmarks
 

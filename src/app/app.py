@@ -25,10 +25,10 @@ class App:
         self.server = server
         self.import_bookmarks_filename = Path(output_dir, IMPORT_BOOKMARKS_FILENAME)
 
-    def display_bookmarks(self, pattern, is_fuzzy, include_url):
+    def display_bookmarks(self, patterns, is_fuzzy, include_url):
         """
         Args:
-            pattern (str | None): a pattern to filter results
+            patterns (list<str> | None): patterns to filter results
             is_fuzzy (bool): whether to perform a fuzzy search or regular search
             include_url (bool): whether to filter by URL too
 
@@ -36,20 +36,7 @@ class App:
             display_bookmarks_section: DisplayBookmarksSection object
         """
         try:
-            bookmarks = self.server.get_bookmarks(pattern, is_fuzzy, include_url)
-
-            # clean last search
-            if not pattern:
-                for b in bookmarks:
-                    if b.title_indexes:
-                        b.title_indexes.clear()
-                    if b.description_indexes:
-                        b.description_indexes.clear()
-                    if b.url_indexes:
-                        b.url_indexes.clear()
-                    if b.section_indexes:
-                        b.section_indexes.clear()
-
+            bookmarks = self.server.get_bookmarks(patterns, is_fuzzy, include_url)
             return DisplayBookmarksSection(bookmarks, None)
         except InternalException:
             return DisplayBookmarksSection(None, GET_BOOKMARKS_ERR_MSG)

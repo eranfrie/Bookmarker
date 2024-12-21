@@ -1,10 +1,10 @@
+import base64
 import logging
 from enum import Enum
 
 from flask import Flask, request
 
 from utils import opts, version
-from utils.html_utils import highlight
 from app.app_sections import AddBookmarkSection
 
 
@@ -75,7 +75,10 @@ class AppAPI:
             fuzzy_checkbox = f'<input type="checkbox" id="fuzzy" {checked}>'
             return """
                 <br>
-                Search: <input type="search" id="searchBookmark" placeholder="pattern"><br>
+                Search:
+                <br>
+                <textarea id="searchBookmark" name="searchBookmark" rows="3" cols="30"></textarea><br>
+                <br>
 
                 """ \
                 + fuzzy_checkbox + \
@@ -90,7 +93,7 @@ class AppAPI:
                 <script type="text/javascript">
                   function searchEvent()
                   {
-                    pattern = document.getElementById("searchBookmark").value;
+                    patterns = document.getElementById("searchBookmark").value;
                     fuzzy = document.getElementById("fuzzy").checked;
                     include_url = document.getElementById("includeurl").checked;
 
@@ -98,7 +101,7 @@ class AppAPI:
                     xhttp.onload = function() {
                       document.getElementById("bookmarks_div").innerHTML = this.responseText;
                     }
-                    xhttp.open("GET", "/bookmarks?pattern=" + pattern +
+                    xhttp.open("GET", "/bookmarks?pattern=" + btoa(patterns) +
                       "&fuzzy=" + fuzzy +
                       "&includeurl=" + include_url);
                     xhttp.send();
@@ -189,24 +192,19 @@ class AppAPI:
 
                 prev_section = None
                 for b in display_bookmarks_section.bookmarks:
-                    title = highlight(b.escaped_chars_title, b.title_indexes)
-                    description = highlight(b.escaped_chars_description, b.description_indexes)
-                    url = highlight(b.escaped_chars_url, b.url_indexes)
-                    section = highlight(b.escaped_chars_section, b.section_indexes)
-
                     if b.section and b.section != prev_section:
                         prev_section = b.section
-                        bookmarks_section += f"<br><u><b><b>{section}</b></u><br>"
+                        bookmarks_section += f"<br><u><b><b>{b.escaped_section}</b></u><br>"
 
                     bookmarks_section += f'<button class="btn" onclick="copyURL(\'{b.escaped_url}\')">' \
                         '<i class="fa fa-copy"></i></button> '
                     bookmarks_section += f'<button class="btn" onclick="deleteBookmark({b.id})">' \
                         '<i class="fa fa-trash"></i></button> '
-                    bookmarks_section += f"<b>{title}:</b> "
+                    bookmarks_section += f"<b>{b.escaped_title}:</b> "
                     # description is optional
                     if b.description:
-                        bookmarks_section += f"{description} "
-                    bookmarks_section += f"<a href={b.escaped_url} target=\"_blank\">{url}</a><br>"
+                        bookmarks_section += f"{b.escaped_description} "
+                    bookmarks_section += f"<a href={b.escaped_url} target=\"_blank\">{b.escaped_url}</a><br>"
             else:
                 bookmarks_section = \
                     f'<div style="color:red">{display_bookmarks_section.display_bookmarks_err}</div>'
@@ -242,21 +240,31 @@ class AppAPI:
 
         @self.app_api.route(Route.BOOKMARKS.value)
         def bookmark():
-            pattern = request.args.get("pattern")
+            patterns = request.args.get("pattern")
+            if patterns:
+                patterns = base64.b64decode(patterns).decode('utf-8')
+                patterns = patterns.splitlines()
+            else:
+                patterns = []
+
             is_fuzzy = request.args.get("fuzzy", IS_FUZZY_DEFAULT)
             is_fuzzy = is_fuzzy.lower() == "true"
             include_url = request.args.get("includeurl", INC_URL_DEFAULT)
             include_url = include_url.lower() == "true"
-            return _bookmarks_section(self.app.display_bookmarks(pattern, is_fuzzy, include_url))
+
+            return _bookmarks_section(self.app.display_bookmarks(patterns, is_fuzzy, include_url))
 
         @self.app_api.route(Route.INDEX.value)
         def index():
             pattern = request.args.get("pattern")
+            patterns = [pattern] if pattern else []
+
             is_fuzzy = request.args.get("fuzzy", IS_FUZZY_DEFAULT)
             is_fuzzy = is_fuzzy.lower() == "true"
             include_url = request.args.get("includeurl", INC_URL_DEFAULT)
             include_url = include_url.lower() == "true"
-            return _main_page(None, self.app.display_bookmarks(pattern, is_fuzzy, include_url), None)
+
+            return _main_page(None, self.app.display_bookmarks(patterns, is_fuzzy, include_url), None)
 
         @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
         def add_bookmark():

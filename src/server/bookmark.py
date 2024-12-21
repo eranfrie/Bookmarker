@@ -1,4 +1,4 @@
-from utils.html_utils import html_escape, split_escaped_text
+from utils.html_utils import html_escape
 from server.fuzzy_search import is_match
 
 
@@ -46,20 +46,6 @@ class Bookmark:
         self.escaped_url = html_escape(self.url)
         self.escaped_section = html_escape(self.section)
 
-        self.escaped_chars_title = split_escaped_text(self.escaped_title)
-        assert len(self.escaped_chars_title) == len(self.title)
-        self.escaped_chars_description = split_escaped_text(self.escaped_description)
-        assert len(self.escaped_chars_description) == len(self.description)
-        self.escaped_chars_url = split_escaped_text(self.escaped_url)
-        assert len(self.escaped_chars_url) == len(self.url)
-        self.escaped_chars_section = split_escaped_text(self.escaped_section)
-        assert len(self.escaped_chars_section) == len(self.section)
-
-        self.title_indexes = None
-        self.description_indexes = None
-        self.url_indexes = None
-        self.section_indexes = None
-
     def __lt__(self, other):
         if self.section_lower != other.section_lower:
             return self.section_lower < other.section_lower
@@ -76,10 +62,6 @@ class Bookmark:
             pattern is lower case
         """
         search_method = is_match if is_fuzzy else _regular_search
-        self.title_indexes = search_method(pattern, self.title_lower)
-        self.description_indexes = search_method(pattern, self.description_lower)
-        self.url_indexes = search_method(pattern, self.url_lower)
-        self.section_indexes = search_method(pattern, self.section_lower)
-        return self.title_indexes is not None or \
-            self.description_indexes is not None or \
-            (self.url_indexes is not None and include_url)
+        return search_method(pattern, self.title_lower) is not None \
+            or search_method(pattern, self.description_lower) is not None \
+            or (search_method(pattern, self.url_lower) is not None and include_url)

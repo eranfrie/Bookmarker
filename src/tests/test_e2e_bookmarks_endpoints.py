@@ -1,3 +1,4 @@
+import base64
 import requests
 
 from app import app
@@ -52,10 +53,9 @@ class TestE2eBookmarksEndpoint(TestE2eBase):
         response = requests.get(URL.BOOKMARKS.value)
         self._compare_num_bookmarks(response, 2)
 
-        pattern = "test_title_3"
+        pattern = base64.b64encode("test_title_3".encode('utf-8'))
         response = requests.get(URL.BOOKMARKS.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 0, db_avail=False)
-        assert response.text.count("mark>") == 0
 
     def test_search_one_results(self):
         self._add_bookmark_to_db("test_title_1", "test_description_1",
@@ -65,7 +65,6 @@ class TestE2eBookmarksEndpoint(TestE2eBase):
         response = requests.get(URL.BOOKMARKS.value)
         self._compare_num_bookmarks(response, 2)
 
-        pattern = "test_title_1"
+        pattern = base64.b64encode("test_title_1".encode('utf-8'))
         response = requests.get(URL.BOOKMARKS.value, params={"pattern": pattern})
         self._compare_num_bookmarks(response, 1, db_avail=False)
-        assert response.text.count("mark>") == len(pattern) * 2
