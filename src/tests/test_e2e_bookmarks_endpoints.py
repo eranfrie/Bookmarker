@@ -10,8 +10,9 @@ from tests.test_e2e_base import TestE2eBase, URL
 class TestE2eBookmarksEndpoint(TestE2eBase):
     def _compare_num_bookmarks(self, response, expected_num_bookmarks, db_avail=True):
         assert response.status_code == 200
+        # expected_num_bookmarks * 2 - because edit functionality adds 1 link per bookmark
         assert response.text.count("href") == \
-            expected_num_bookmarks + response.text.count("font-awesome.min.css")
+            expected_num_bookmarks * 2 + response.text.count("font-awesome.min.css")
         if db_avail:
             assert f"Total: {expected_num_bookmarks}" in response.text
             assert self._count_bookmarks_in_db() == expected_num_bookmarks

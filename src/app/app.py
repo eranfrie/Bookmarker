@@ -3,14 +3,16 @@ import logging
 
 from utils.html_utils import html_escape
 from server.server_api import InternalException, TitleRequiredException, URLRequiredException
-from app.app_sections import DisplayBookmarksSection, AddBookmarkSection, StatusSection
+from app.app_sections import DisplayBookmarksSection, BookmarkSection, StatusSection
 
 
 GET_BOOKMARKS_ERR_MSG = "Internal error. Please try again later"
 ADD_BOOKMARK_ERR_MSG = "Internal error: Failed to add a new bookmark. Please try again later"
 ADD_BOOKMARK_OK_MSG = "Bookmark added successfully"
-ADD_BOOKMARK_TITLE_REQUIRED_MSG = "Error: Title is a required field"
-ADD_BOOKMARK_URL_REQUIRED_MSG = "Error: URL is a required field"
+BOOKMARK_TITLE_REQUIRED_MSG = "Error: Title is a required field"
+BOOKMARK_URL_REQUIRED_MSG = "Error: URL is a required field"
+EDIT_BOOKMARK_ERR_MSG = "Internal error: Failed to edit a bookmark. Please try again later"
+EDIT_BOOKMARK_OK_MSG = "Bookmark edited successfully"
 
 DELETE_BOOKMARK_OK_MSG = "Bookmark deleted successfully"
 DELETE_BOOKMARK_ERR_MSG = "Failed to delete bookmark"
@@ -47,27 +49,63 @@ class App:
 
         try:
             self.server.add_bookmark(title, description, url, section)
-            add_bookmark_section = AddBookmarkSection("", "", "", "")
+            bookmark_section = BookmarkSection("", "", "", "", None)
             status_section = StatusSection(True, ADD_BOOKMARK_OK_MSG)
         except InternalException:
-            add_bookmark_section = AddBookmarkSection(title, description, url, section)
+            bookmark_section = BookmarkSection(title, description, url, section, None)
             status_section = StatusSection(False, ADD_BOOKMARK_ERR_MSG)
         except TitleRequiredException:
-            add_bookmark_section = AddBookmarkSection(title, description, url, section)
-            status_section = StatusSection(False, ADD_BOOKMARK_TITLE_REQUIRED_MSG)
+            bookmark_section = BookmarkSection(title, description, url, section, None)
+            status_section = StatusSection(False, BOOKMARK_TITLE_REQUIRED_MSG)
         except URLRequiredException:
-            add_bookmark_section = AddBookmarkSection(title, description, url, section)
-            status_section = StatusSection(False, ADD_BOOKMARK_URL_REQUIRED_MSG)
+            bookmark_section = BookmarkSection(title, description, url, section, None)
+            status_section = StatusSection(False, BOOKMARK_URL_REQUIRED_MSG)
 
-        # escape add_bookmark_section
-        escaped_add_bookmarks_section = AddBookmarkSection(
-            html_escape(add_bookmark_section.last_title),
-            html_escape(add_bookmark_section.last_description),
-            html_escape(add_bookmark_section.last_url),
-            html_escape(add_bookmark_section.last_section)
+        # escape bookmark_section
+        escaped_bookmarks_section = BookmarkSection(
+            html_escape(bookmark_section.last_title),
+            html_escape(bookmark_section.last_description),
+            html_escape(bookmark_section.last_url),
+            html_escape(bookmark_section.last_section),
+            None
         )
 
-        return status_section, self.display_bookmarks(None, None, None), escaped_add_bookmarks_section
+        return status_section, self.display_bookmarks(None, None, None), escaped_bookmarks_section
+
+    def edit_bookmark_form(self, bookmark_id):
+        return self.server.get_bookmark(bookmark_id)
+
+    def edit_bookmark(self, bookmark_id, title, description, url, section):
+        logger.info("got request to edit bookmark: bookmark_id=%s, title=%s, description=%s, url=%s, section=%s",
+                    bookmark_id, title, description, url, section)
+
+        try:
+            self.server.edit_bookmark(bookmark_id, title, description, url, section)
+            bookmark_section = BookmarkSection("", "", "", "", None)
+            status_section = StatusSection(True, EDIT_BOOKMARK_OK_MSG)
+        except InternalException:
+            bookmark_section = BookmarkSection(title, description, url, section, None)
+            status_section = StatusSection(False, EDIT_BOOKMARK_ERR_MSG)
+            return status_section, None, None
+        except TitleRequiredException:
+            bookmark_section = BookmarkSection(title, description, url, section, None)
+            status_section = StatusSection(False, BOOKMARK_TITLE_REQUIRED_MSG)
+            return status_section, None, None
+        except URLRequiredException:
+            bookmark_section = BookmarkSection(title, description, url, section, None)
+            status_section = StatusSection(False, BOOKMARK_URL_REQUIRED_MSG)
+            return status_section, None, None
+
+        # escape bookmark_section
+        escaped_bookmark_section = BookmarkSection(
+            html_escape(bookmark_section.last_title),
+            html_escape(bookmark_section.last_description),
+            html_escape(bookmark_section.last_url),
+            html_escape(bookmark_section.last_section),
+            None
+        )
+
+        return status_section, self.display_bookmarks(None, None, None), escaped_bookmark_section
 
     def delete_bookmark(self, bookmark_id):
         if self.server.delete_bookmark(bookmark_id):

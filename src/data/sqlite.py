@@ -13,6 +13,22 @@ def sql_escape(text):
     return text.replace("'", "''")
 
 
+def record_to_json(record):
+    # check if description is not empty and not None
+    # (in sqlite, missing field is returned as "None" string)
+    description = None
+    if record[2] and record[2] != "None":
+        description = record[2]
+
+    return {
+        "id": record[0],
+        "title": record[1],
+        "description": description,
+        "url": record[3],
+        "section": record[4],
+    }
+
+
 class Sqlite:
     def __init__(self, db_filename):
         self.db_filename = db_filename
@@ -59,23 +75,29 @@ class Sqlite:
             raise e
 
         for record in records:
-            # check if description is not empty and not None
-            # (in sqlite, missing field is returned as "None" string)
-            description = None
-            if record[2] and record[2] != "None":
-                description = record[2]
+            bookmarks.append(record_to_json(record))
 
-            bookmarks.append(
-                {
-                    "id": record[0],
-                    "title": record[1],
-                    "description": description,
-                    "url": record[3],
-                    "section": record[4],
-                }
-            )
         Sqlite._close(conn)
         return bookmarks
+
+    def read_bookmark(self, bookmark_id):
+        """
+        Returns:
+            dict: a record from the db
+        """
+        conn, cursor = self._connect()
+
+        try:
+            records = cursor.execute(f"SELECT * FROM {BOOKMARKS_TABLE} where id={bookmark_id};")
+        except Exception as e:
+            Sqlite._close(conn)
+            raise e
+
+        bookmark = None
+        for record in records:  # only one record will be found
+            bookmark = record_to_json(record)
+        Sqlite._close(conn)
+        return bookmark
 
     def add_bookmark(self, title, description, url, section):
         conn, cursor = self._connect()
@@ -85,6 +107,18 @@ class Sqlite:
                            f"'{sql_escape(description)}', "
                            f"'{sql_escape(url)}', "
                            f"'{sql_escape(section)}');")
+        finally:
+            Sqlite._close(conn)
+
+    def edit_bookmark(self, bookmark_id, title, description, url, section):
+        conn, cursor = self._connect()
+        try:
+            cursor.execute(f"UPDATE {BOOKMARKS_TABLE} "
+                           f"SET title='{sql_escape(title)}', "
+                           f"description='{sql_escape(description)}', "
+                           f"url='{sql_escape(url)}', "
+                           f"section='{sql_escape(section)}' "
+                           f"WHERE id={bookmark_id};")
         finally:
             Sqlite._close(conn)
 

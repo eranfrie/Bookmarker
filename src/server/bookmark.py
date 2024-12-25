@@ -23,6 +23,19 @@ def _regular_search(pattern, line):
 
 # pylint: disable=R0902 (too-many-instance-attributes)
 class Bookmark:
+    @classmethod
+    def from_json(cls, j):
+        description = j["description"] if j["description"] else ""
+        section = j["section"] if j["section"] else ""
+        section = section.lower()  # ignore case
+        return Bookmark(
+            j["id"],
+            j["title"],
+            description,
+            j["url"],
+            section,
+        )
+
     # pylint: disable=R0913 (too-many-arguments)
     def __init__(self, bookmark_id, title, description, url, section):
         self.id = bookmark_id

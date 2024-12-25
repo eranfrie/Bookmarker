@@ -5,7 +5,7 @@ from enum import Enum
 from flask import Flask, request
 
 from utils import opts, version
-from app.app_sections import AddBookmarkSection
+from app.app_sections import BookmarkSection
 
 
 INC_URL_DEFAULT = "false"
@@ -18,6 +18,8 @@ class Route (Enum):
     INDEX = "/"
     BOOKMARKS = "/bookmarks"
     ADD_BOOKMARK = "/add_bookmark"
+    EDIT_FORM = "/edit"  # edit form (GET)
+    EDIT_BOOKMARK = "/edit_bookmark"  # edit and display all (POST)
     DELETE_BOOKMARK = "/delete_bookmark"
     IMPORT = "/import"
     ABOUT = "/about"
@@ -27,6 +29,11 @@ class Page (Enum):
     HOME = "Home"
     IMPORT = "Import"
     ABOUT = "About"
+
+
+class BookmarkFormType (Enum):
+    ADD = "Add"
+    EDIT = "Edit"
 
 
 page_to_route = {
@@ -47,27 +54,33 @@ class AppAPI:
         def _status_to_color(status):
             return "green" if status.success else "red"
 
-        def _add_bookmark_form(add_bookmark_section, sections):
-            if not add_bookmark_section:
-                add_bookmark_section = AddBookmarkSection("", "", "", "")
+        def _bookmark_form(bookmark_form_type, bookmark_section, sections):
+            """A form to add/edit a bookmark."""
+            if not bookmark_section:
+                bookmark_section = BookmarkSection("", "", "", "", None)
 
-            html = '<h4>Add a new bookmark</h4>'
-            html += f'<form action="/add_bookmark" method="post">' \
-                    f'<input type="text" name="section" list="sections" placeholder="Section" ' \
-                    f'size="50" value="{add_bookmark_section.last_section}"><br>' \
+            html = f'<h4>{bookmark_form_type.value} a bookmark</h4>'
+            html += f'<form action="/{bookmark_form_type.value.lower()}_bookmark" method="post">'
+
+            if bookmark_section.bookmark_id is not None:
+                html += '<input type="hidden" id="bookmark_id" name="bookmark_id" ' \
+                        f'value="{bookmark_section.bookmark_id}" />'
+
+            html += f'<input type="text" name="section" list="sections" placeholder="Section" ' \
+                    f'size="50" value="{bookmark_section.last_section}"><br>' \
                     f'<input type="text" name="title" placeholder="* Title" ' \
-                    f'size="50" value="{add_bookmark_section.last_title}"><br>' \
+                    f'size="50" value="{bookmark_section.last_title}"><br>' \
                     f'<input type="text" name="description" placeholder="Description" ' \
-                    f'size="50" value="{add_bookmark_section.last_description}"><br>' \
+                    f'size="50" value="{bookmark_section.last_description}"><br>' \
                     f'<input type="text" name="url" placeholder="* URL" ' \
-                    f'size="50" value="{add_bookmark_section.last_url}"><br>' \
+                    f'size="50" value="{bookmark_section.last_url}"><br>' \
                     f'<datalist id="sections">'
             for s in sections:
                 html += f'<option>{s}</option>'
             html += '</datalist>' \
                 '<input onclick="this.form.submit();this.disabled = true;" type="submit">' \
-                '</form>' \
-                "<hr>"
+                '</form>'
+
             return html
 
         def _search_section():
@@ -198,6 +211,9 @@ class AppAPI:
 
                     bookmarks_section += f'<button class="btn" onclick="copyURL(\'{b.escaped_url}\')">' \
                         '<i class="fa fa-copy"></i></button> '
+                    bookmarks_section += '<button class="btn" ' \
+                        f'onclick="window.location.href=\'{Route.EDIT_FORM.value}?id={b.id}\'">' \
+                        '<i class="fa fa-edit"></i></button> '
                     bookmarks_section += f'<button class="btn" onclick="deleteBookmark({b.id})">' \
                         '<i class="fa fa-trash"></i></button> '
                     bookmarks_section += f"<b>{b.escaped_title}:</b> "
@@ -234,7 +250,8 @@ class AppAPI:
             return _header() + \
                 _menu(Page.HOME) + \
                 _status_section(status_section) + \
-                _add_bookmark_form(add_bookmark_section, sections) + \
+                _bookmark_form(BookmarkFormType.ADD, add_bookmark_section, sections) + \
+                "<hr>" + \
                 _search_section() + \
                 _bookmarks_section(display_bookmarks_section)
 
@@ -273,9 +290,40 @@ class AppAPI:
             url = request.form.get("url")
             section = request.form.get("section")
 
-            status_section, display_bookmarks_section, add_bookmark_section = \
+            status_section, display_bookmarks_section, bookmark_section = \
                 self.app.add_bookmark(title, description, url, section)
-            return _main_page(status_section, display_bookmarks_section, add_bookmark_section)
+            return _main_page(status_section, display_bookmarks_section, bookmark_section)
+
+        def _display_edit_form(title, description, url, section, bookmark_id, status_section):
+            bookmark_section = BookmarkSection(title, description, url, section, bookmark_id)
+            sections = {}
+            return _header() + \
+                _menu(None) + \
+                _status_section(status_section) + \
+                _bookmark_form(BookmarkFormType.EDIT, bookmark_section, sections)
+
+        @self.app_api.route(Route.EDIT_FORM.value)
+        def edit_form():
+            bookmark_id = request.args.get("id")
+            bookmark = self.app.edit_bookmark_form(bookmark_id)
+            if not bookmark:
+                return _main_page(None, self.app.display_bookmarks(None, False, False), None)
+
+            return _display_edit_form(bookmark.title, bookmark.description, bookmark.url, bookmark.section, bookmark_id, None)
+
+        @self.app_api.route(Route.EDIT_BOOKMARK.value, methods=["POST"])
+        def edit_bookmark():
+            bookmark_id = request.form.get("bookmark_id")
+            title = request.form.get("title")
+            description = request.form.get("description")
+            url = request.form.get("url")
+            section = request.form.get("section")
+            status_section, display_bookmarks_section, bookmark_section = \
+                self.app.edit_bookmark(bookmark_id, title, description, url, section)
+
+            if not status_section.success:
+                return _display_edit_form(title, description, url, section, bookmark_id, status_section)
+            return _main_page(status_section, display_bookmarks_section, bookmark_section)
 
         @self.app_api.route(Route.DELETE_BOOKMARK.value, methods=["POST"])
         def delete_bookmark():

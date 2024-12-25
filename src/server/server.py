@@ -39,18 +39,7 @@ class Server:
             raise InternalException() from e
 
         for j in bookmarks_json:
-            description = j["description"] if j["description"] else ""
-            section = j["section"] if j["section"] else ""
-            section = section.lower()  # ignore case
-            bookmarks.append(
-                Bookmark(
-                    j["id"],
-                    j["title"],
-                    description,
-                    j["url"],
-                    section,
-                )
-            )
+            bookmarks.append(Bookmark.from_json(j))
 
         bookmarks.sort()
         self._cache = bookmarks
@@ -121,6 +110,45 @@ class Server:
 
         logger.info("import bookmarks - added=%s, failed=%s", num_added, num_failed)
         return num_added, num_failed
+
+    def get_bookmark(self, bookmark_id):
+        """
+        Returns:
+            str if bookmark exists or None
+        """
+        try:
+            bookmark_id = int(bookmark_id)
+            j = self.db.read_bookmark(bookmark_id)
+            return Bookmark.from_json(j)
+        # pylint: disable=W0703 (broad-except)
+        except Exception:
+            logger.exception("failed to get bookmark_id %s", bookmark_id)
+            return None
+
+    def edit_bookmark(self, bookmark_id, title, description, url, section):
+        self._invalidate_cache()
+
+        # strip input
+        title = "" if title is None else title.strip()
+        description = "" if description is None else description.strip()
+        url = "" if url is None else url.strip()
+        section = "" if section is None else section.strip()
+
+        # input validation
+        if not title:
+            logger.debug("edit bookmark failed - title is required")
+            raise TitleRequiredException()
+        if not url:
+            logger.debug("edit bookmark failed - url is required")
+            raise URLRequiredException()
+
+        try:
+            self.db.edit_bookmark(bookmark_id, title, description, url, section)
+            logger.info("bookmark edited successfully")
+        except Exception as e:
+            logger.exception("failed to update bookmark in db: bookmark_id=%s, title=%s, description=%s, url=%s, section=%s",
+                             bookmark_id, title, description, url, section)
+            raise InternalException() from e
 
     def delete_bookmark(self, bookmark_id):
         """

@@ -13,14 +13,9 @@ class DisplayBookmarksSection:
         self.display_bookmarks_err = display_bookmarks_err
 
 
-class AddBookmarkSection:
+class BookmarkSection:
     """
     Args:
-        last_op_succeeded (bool | None):
-            True/False if adding a bookmark is being requested and succeeded/failed accordingly.
-            None if adding a bookmark is not being requested.
-        last_op_msg (str | None):
-            if last_op_succeeded is True/False, a message to display.
         last_title (str | ""): title to be displayed in the "add bookmark" input field.
             empty string ("") to display the placeholder.
         last_description (str | ""): description to be displayed in the "add bookmark" input field.
@@ -29,12 +24,14 @@ class AddBookmarkSection:
             empty string ("") to display the placeholder.
         last_section (str | ""): section to be displayed in the "add bookmark" input field.
             empty string ("") to display the placeholder.
+        bookmark_id: relevant if it's an edit form, otherwise None
     """
-    def __init__(self, last_title, last_description, last_url, last_section):
+    def __init__(self, last_title, last_description, last_url, last_section, bookmark_id):
         self.last_title = last_title
         self.last_description = last_description
         self.last_url = last_url
         self.last_section = last_section
+        self.bookmark_id = bookmark_id
 
 
 class StatusSection:

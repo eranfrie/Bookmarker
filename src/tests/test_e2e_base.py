@@ -21,6 +21,8 @@ class URL (Enum):
     INDEX = TEST_URL + Route.INDEX.value
     BOOKMARKS = TEST_URL + Route.BOOKMARKS.value
     ADD_BOOKMARK = TEST_URL + Route.ADD_BOOKMARK.value
+    EDIT_FORM = TEST_URL + Route.EDIT_FORM.value
+    EDIT_BOOKMARK = TEST_URL + Route.EDIT_BOOKMARK.value
     DELETE_BOOKMARK = TEST_URL + Route.DELETE_BOOKMARK.value
     IMPORT = TEST_URL + Route.IMPORT.value
     ABOUT = TEST_URL + Route.ABOUT.value
@@ -59,8 +61,9 @@ class TestE2eBase:
 
     def _compare_num_bookmarks(self, response, expected_num_bookmarks, db_avail=True):
         assert response.status_code == 200
+        # expected_num_bookmarks * 2 - because edit functionality adds 1 link per bookmark
         assert response.text.count("href") == \
-            expected_num_bookmarks + NUM_MENU_LINKS + response.text.count("font-awesome.min.css")
+            expected_num_bookmarks * 2 + NUM_MENU_LINKS + response.text.count("font-awesome.min.css")
         if db_avail:
             assert f"Total: {expected_num_bookmarks}" in response.text
             assert self._count_bookmarks_in_db() == expected_num_bookmarks

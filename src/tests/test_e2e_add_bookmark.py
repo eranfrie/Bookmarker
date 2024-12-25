@@ -86,52 +86,52 @@ class TestE2eAddBookmark(TestE2eBase):
     def test_add_bookmark_title_required(self):
         response = self._add_bookmark("", "test_description", "http://www.test.com", "test_section")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_TITLE_REQUIRED_MSG) == 1
 
     def test_add_bookmark_url_required(self):
         response = self._add_bookmark("test_title_2", "test_description", "", "test_section")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_URL_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_URL_REQUIRED_MSG) == 1
 
     def test_add_bookmark_description_only(self):
         response = self._add_bookmark("", "test_description", "", "")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_TITLE_REQUIRED_MSG) == 1
 
     def test_add_bookmark_no_fields(self):
         response = self._add_bookmark("", "", "", "")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_TITLE_REQUIRED_MSG) == 1
 
     def test_add_bookmark_title_whitespace(self):
         response = self._add_bookmark(" ", "", "test_url", "")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_TITLE_REQUIRED_MSG) == 1
 
     def test_add_bookmark_title_tab(self):
         response = self._add_bookmark("\t", "", "test_url", "")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_TITLE_REQUIRED_MSG) == 1
 
     def test_add_bookmark_title_newline(self):
         response = self._add_bookmark("\n", "", "test_url", "")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_TITLE_REQUIRED_MSG) == 1
 
     def test_add_bookmark_url_whitespace(self):
         response = self._add_bookmark("test_title", "", " ", "")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_URL_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_URL_REQUIRED_MSG) == 1
 
     def test_add_bookmark_url_tab(self):
         response = self._add_bookmark("test_title", "", "\t", "")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_URL_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_URL_REQUIRED_MSG) == 1
 
     def test_add_bookmark_url_newline(self):
         response = self._add_bookmark("test_title", "", "\n", "")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_URL_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_URL_REQUIRED_MSG) == 1
 
     def test_html_escaping(self):
         response = self._add_bookmark("<>test_title", "<>test_description",
@@ -170,7 +170,7 @@ class TestE2eAddBookmark(TestE2eBase):
         # error due to missing title
         response = self._add_bookmark("", "test_description", "test_url", "test_section")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_TITLE_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_TITLE_REQUIRED_MSG) == 1
         assert 'value="test_description"' in response.text \
             and 'value="test_url"' in response.text \
             and 'value="test_section"' in response.text
@@ -178,7 +178,7 @@ class TestE2eAddBookmark(TestE2eBase):
         # error due to missing url
         response = self._add_bookmark("test_title", "test_description", "", "test_section")
         self._compare_num_bookmarks(response, 0)
-        assert response.text.count(app.ADD_BOOKMARK_URL_REQUIRED_MSG) == 1
+        assert response.text.count(app.BOOKMARK_URL_REQUIRED_MSG) == 1
         assert 'value="test_description"' in response.text \
             and 'value="test_title"' in response.text \
             and 'value="test_section"' in response.text
