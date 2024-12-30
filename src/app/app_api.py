@@ -10,6 +10,7 @@ from app.app_sections import BookmarkSection
 
 INC_URL_DEFAULT = "false"
 IS_FUZZY_DEFAULT = "true"
+FAVORITES_ONLY_DEFAULT = "false"
 
 logger = logging.getLogger()
 
@@ -20,6 +21,7 @@ class Route (Enum):
     ADD_BOOKMARK = "/add_bookmark"
     EDIT_FORM = "/edit"  # edit form (GET)
     EDIT_BOOKMARK = "/edit_bookmark"  # edit and display all (POST)
+    TOGGLE_FAVORITED = "/toggleFavorited"
     DELETE_BOOKMARK = "/delete_bookmark"
     IMPORT = "/import"
     ABOUT = "/about"
@@ -42,6 +44,13 @@ page_to_route = {
     Page.ABOUT: Route.ABOUT.value,
 }
 assert len(Page) == len(page_to_route)
+
+
+def get_favorite_star_color(is_favorited):
+    if is_favorited:
+        return "red"
+    else:
+        return "lightgray"
 
 
 class AppAPI:
@@ -101,6 +110,9 @@ class AppAPI:
                 <input type="checkbox" id="includeurl">
                 <label for="includeurl"> Include URL</label><br>
 
+                <input type="checkbox" id="favoritesonly">
+                <label for="favoritesonly"> Favorites only</label><br>
+
                 <br>
 
                 <script type="text/javascript">
@@ -109,19 +121,28 @@ class AppAPI:
                     patterns = document.getElementById("searchBookmark").value;
                     fuzzy = document.getElementById("fuzzy").checked;
                     include_url = document.getElementById("includeurl").checked;
+                    favorites_only = document.getElementById("favoritesonly").checked;
 
                     const xhttp = new XMLHttpRequest();
                     xhttp.onload = function() {
                       document.getElementById("bookmarks_div").innerHTML = this.responseText;
+
+                      // eval the scripts
+                      const scripts = document.querySelectorAll('#bookmarks_div script');
+                      scripts.forEach(script => {
+                        eval(script.textContent);
+                      });
                     }
                     xhttp.open("GET", "/bookmarks?pattern=" + btoa(patterns) +
                       "&fuzzy=" + fuzzy +
-                      "&includeurl=" + include_url);
+                      "&includeurl=" + include_url +
+                      "&favoritesonly=" + favorites_only);
                     xhttp.send();
                   }
 
                   fuzzy.addEventListener("input", searchEvent);
                   includeurl.addEventListener("input", searchEvent);
+                  favoritesonly.addEventListener("input", searchEvent);
                   searchBookmark.addEventListener("input", searchEvent);
 
                   window.onkeydown = function(e) {
@@ -198,6 +219,16 @@ class AppAPI:
                           return False
                         }
                       }
+
+                      function toggle_favorited(bookmark_id)
+                      {
+                        const xhttp = new XMLHttpRequest();
+                        xhttp.onload = function() {
+                          document.getElementById("favoriteStar_" + bookmark_id).style.color = this.responseText;
+                        }
+                        xhttp.open("POST", "/toggleFavorited?bookmark_id=" + bookmark_id);
+                        xhttp.send();
+                      }
                     </script>
                 """
 
@@ -216,6 +247,15 @@ class AppAPI:
                         '<i class="fa fa-edit"></i></button> '
                     bookmarks_section += f'<button class="btn" onclick="deleteBookmark({b.id})">' \
                         '<i class="fa fa-trash"></i></button> '
+                    star_color = get_favorite_star_color(b.is_favorited)
+                    bookmarks_section += f'<span id="favoriteStar_{b.id}" style="color:{star_color}; cursor:pointer;">&#9733;</span> <!-- Star symbol -->'
+                    bookmarks_section += '<script>' \
+                        f'document.getElementById("favoriteStar_{b.id}").addEventListener("click", function()' \
+                        '{' \
+                        f'  toggle_favorited({b.id});' \
+                        '});' \
+                      '</script>'
+
                     bookmarks_section += f"<b>{b.escaped_title}:</b> "
                     # description is optional
                     if b.description:
@@ -268,8 +308,10 @@ class AppAPI:
             is_fuzzy = is_fuzzy.lower() == "true"
             include_url = request.args.get("includeurl", INC_URL_DEFAULT)
             include_url = include_url.lower() == "true"
+            favorites_only = request.args.get("favoritesonly", FAVORITES_ONLY_DEFAULT)
+            favorites_only = favorites_only.lower() == "true"
 
-            return _bookmarks_section(self.app.display_bookmarks(patterns, is_fuzzy, include_url))
+            return _bookmarks_section(self.app.display_bookmarks(patterns, is_fuzzy, include_url, favorites_only))
 
         @self.app_api.route(Route.INDEX.value)
         def index():
@@ -280,8 +322,10 @@ class AppAPI:
             is_fuzzy = is_fuzzy.lower() == "true"
             include_url = request.args.get("includeurl", INC_URL_DEFAULT)
             include_url = include_url.lower() == "true"
+            favorites_only = request.args.get("favoritesonly", FAVORITES_ONLY_DEFAULT)
+            favorites_only = favorites_only.lower() == "true"
 
-            return _main_page(None, self.app.display_bookmarks(patterns, is_fuzzy, include_url), None)
+            return _main_page(None, self.app.display_bookmarks(patterns, is_fuzzy, include_url, favorites_only), None)
 
         @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
         def add_bookmark():
@@ -307,7 +351,7 @@ class AppAPI:
             bookmark_id = request.args.get("id")
             bookmark = self.app.edit_bookmark_form(bookmark_id)
             if not bookmark:
-                return _main_page(None, self.app.display_bookmarks(None, False, False), None)
+                return _main_page(None, self.app.display_bookmarks(None, False, False, False), None)
 
             return _display_edit_form(bookmark.title, bookmark.description, bookmark.url, bookmark.section, bookmark_id, None)
 
@@ -324,6 +368,12 @@ class AppAPI:
             if not status_section.success:
                 return _display_edit_form(title, description, url, section, bookmark_id, status_section)
             return _main_page(status_section, display_bookmarks_section, bookmark_section)
+
+        @self.app_api.route(Route.TOGGLE_FAVORITED.value, methods=["POST"])
+        def toggle_facorited():
+            bookmark_id = request.args.get("bookmark_id")
+            is_favorited = self.app.toggle_favorited(bookmark_id)
+            return get_favorite_star_color(is_favorited)
 
         @self.app_api.route(Route.DELETE_BOOKMARK.value, methods=["POST"])
         def delete_bookmark():

@@ -26,6 +26,7 @@ def record_to_json(record):
         "description": description,
         "url": record[3],
         "section": record[4],
+        "is_favorited": bool(record[5]),
     }
 
 
@@ -35,6 +36,7 @@ class Sqlite:
         logger.info("DB filename = %s", self.db_filename)
 
         self._create_tables_if_not_exists()
+        self._migrate_bookmarks_table()
 
     def _connect(self):
         conn = sqlite3.connect(self.db_filename)
@@ -53,10 +55,42 @@ class Sqlite:
             "title text NOT NULL," \
             "description text," \
             "url text NOT NULL," \
-            "section text" \
+            "section text," \
+            "is_favorited BOOLEAN NOT NULL" \
             ");"
         cursor.execute(bookmarks_table)
         Sqlite._close(conn)
+
+    def _migrate_bookmarks_table(self):
+        """Migrate the bookmarks tabke if needed.
+
+        A 'is_favorited' column was added. This function checks
+        if it's missing, creates it with 'false' values.
+        """
+        if self._does_column_exist("is_favorited"):
+            return
+
+        logger.info("'is_favorited' is missing - creating it")
+
+        conn, cursor = self._connect()
+        cursor.execute(f"ALTER TABLE {BOOKMARKS_TABLE} ADD COLUMN is_favorited BOOLEAN")
+        cursor.execute(f"UPDATE {BOOKMARKS_TABLE} SET is_favorited=False;");
+        Sqlite._close(conn)
+
+    def _does_column_exist(self, column_name):
+        conn, cursor = self._connect()
+
+        column_exists = False
+
+        cursor.execute(f"PRAGMA table_info({BOOKMARKS_TABLE})")
+        columns = cursor.fetchall()
+        for column in columns:
+            if column[1] == column_name:
+                column_exists = True
+                break
+
+        Sqlite._close(conn)
+        return column_exists
 
     def read_all_bookmarks(self):
         """
@@ -99,14 +133,15 @@ class Sqlite:
         Sqlite._close(conn)
         return bookmark
 
-    def add_bookmark(self, title, description, url, section):
+    def add_bookmark(self, title, description, url, section, is_favorited):
         conn, cursor = self._connect()
         try:
-            cursor.execute(f"INSERT INTO {BOOKMARKS_TABLE} (title, description, url, section) "
+            cursor.execute(f"INSERT INTO {BOOKMARKS_TABLE} (title, description, url, section, is_favorited) "
                            f"VALUES ('{sql_escape(title)}', "
                            f"'{sql_escape(description)}', "
                            f"'{sql_escape(url)}', "
-                           f"'{sql_escape(section)}');")
+                           f"'{sql_escape(section)}', "
+                           f"{is_favorited});")
         finally:
             Sqlite._close(conn)
 
@@ -119,6 +154,24 @@ class Sqlite:
                            f"url='{sql_escape(url)}', "
                            f"section='{sql_escape(section)}' "
                            f"WHERE id={bookmark_id};")
+        finally:
+            Sqlite._close(conn)
+
+    def toggle_favorited(self, bookmark_id):
+        bookmark = self.read_bookmark(bookmark_id)
+
+        was_favorited = bookmark["is_favorited"]
+        new_state = not was_favorited
+
+        conn, cursor = self._connect()
+        try:
+            cursor.execute(f"UPDATE {BOOKMARKS_TABLE} "
+                           f"SET "
+                           f"is_favorited={new_state} "
+                           f"WHERE id={bookmark_id};")
+            return new_state
+        except Exception:
+            return not new_state
         finally:
             Sqlite._close(conn)
 

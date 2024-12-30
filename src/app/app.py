@@ -27,18 +27,19 @@ class App:
         self.server = server
         self.import_bookmarks_filename = Path(output_dir, IMPORT_BOOKMARKS_FILENAME)
 
-    def display_bookmarks(self, patterns, is_fuzzy, include_url):
+    def display_bookmarks(self, patterns, is_fuzzy, include_url, favorites_only):
         """
         Args:
             patterns (list<str> | None): patterns to filter results
             is_fuzzy (bool): whether to perform a fuzzy search or regular search
             include_url (bool): whether to filter by URL too
+            favorites_only (bool): whether to filter favorited bookmarks
 
         Returns:
             display_bookmarks_section: DisplayBookmarksSection object
         """
         try:
-            bookmarks = self.server.get_bookmarks(patterns, is_fuzzy, include_url)
+            bookmarks = self.server.get_bookmarks(patterns, is_fuzzy, include_url, favorites_only)
             return DisplayBookmarksSection(bookmarks, None)
         except InternalException:
             return DisplayBookmarksSection(None, GET_BOOKMARKS_ERR_MSG)
@@ -70,7 +71,7 @@ class App:
             None
         )
 
-        return status_section, self.display_bookmarks(None, None, None), escaped_bookmarks_section
+        return status_section, self.display_bookmarks(None, None, None, None), escaped_bookmarks_section
 
     def edit_bookmark_form(self, bookmark_id):
         return self.server.get_bookmark(bookmark_id)
@@ -105,7 +106,10 @@ class App:
             None
         )
 
-        return status_section, self.display_bookmarks(None, None, None), escaped_bookmark_section
+        return status_section, self.display_bookmarks(None, None, None, None), escaped_bookmark_section
+
+    def toggle_favorited(self, bookmark_id):
+        return self.server.toggle_favorited(bookmark_id)
 
     def delete_bookmark(self, bookmark_id):
         if self.server.delete_bookmark(bookmark_id):
@@ -114,7 +118,7 @@ class App:
             logger.error("failed to delete bookmark %s", bookmark_id)
             status_section = StatusSection(False, DELETE_BOOKMARK_ERR_MSG)
 
-        return status_section, self.display_bookmarks(None, None, None)
+        return status_section, self.display_bookmarks(None, None, None, None)
 
     def import_bookmarks(self, bookmarks_file):
         """

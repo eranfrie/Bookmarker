@@ -34,15 +34,17 @@ class Bookmark:
             description,
             j["url"],
             section,
+            j["is_favorited"],
         )
 
     # pylint: disable=R0913 (too-many-arguments)
-    def __init__(self, bookmark_id, title, description, url, section):
+    def __init__(self, bookmark_id, title, description, url, section, is_favorited):
         self.id = bookmark_id
         self.title = title if title else ""
         self.description = description if description else ""
         self.url = url if url else ""
         self.section = section.lower() if section else ""  # section always lower case
+        self.is_favorited = is_favorited
 
         # don't be sensitive around / separators
         sub_sections = self.section.split("/")

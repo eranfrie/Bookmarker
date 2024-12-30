@@ -45,8 +45,12 @@ class Server:
         self._cache = bookmarks
         return self._cache
 
-    def get_bookmarks(self, patterns, is_fuzzy, include_url):
+    def get_bookmarks(self, patterns, is_fuzzy, include_url, favorites_only):
         bookmarks = self._get_all_bookmarks()
+
+        if favorites_only:
+            bookmarks = [b for b in bookmarks if b.is_favorited]
+
         if not patterns:
             return bookmarks
 
@@ -74,7 +78,7 @@ class Server:
             raise URLRequiredException()
 
         try:
-            self.db.add_bookmark(title, description, url, section)
+            self.db.add_bookmark(title, description, url, section, False)
             logger.info("bookmark added successfully")
         except Exception as e:
             logger.exception("failed to add bookmark to db: title=%s, description=%s, url=%s, section=%s",
@@ -149,6 +153,11 @@ class Server:
             logger.exception("failed to update bookmark in db: bookmark_id=%s, title=%s, description=%s, url=%s, section=%s",
                              bookmark_id, title, description, url, section)
             raise InternalException() from e
+
+    def toggle_favorited(self, bookmark_id):
+        self._invalidate_cache()
+
+        return self.db.toggle_favorited(bookmark_id)
 
     def delete_bookmark(self, bookmark_id):
         """

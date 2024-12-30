@@ -11,7 +11,7 @@ class TestFuzzySearch:
         bookmarks = []
         for v in values:
             bookmarks.append(
-                Bookmark(1, "", "", "", v),
+                Bookmark(1, "", "", "", v, False),
             )
         bookmarks.sort()
         for v, b in zip(sorted_values, bookmarks):
@@ -21,7 +21,7 @@ class TestFuzzySearch:
         bookmarks = []
         for v in values:
             bookmarks.append(
-                Bookmark(1, v, "", "", ""),
+                Bookmark(1, v, "", "", "", False),
             )
         bookmarks.sort()
         for v, b in zip(sorted_values, bookmarks):
@@ -31,7 +31,7 @@ class TestFuzzySearch:
         bookmarks = []
         for v in values:
             bookmarks.append(
-                Bookmark(1, "", v, "", ""),
+                Bookmark(1, "", v, "", "", False),
             )
         bookmarks.sort()
         for v, b in zip(sorted_values, bookmarks):
@@ -41,7 +41,7 @@ class TestFuzzySearch:
         bookmarks = []
         for v in values:
             bookmarks.append(
-                Bookmark(1, "", "", v, ""),
+                Bookmark(1, "", "", v, "", False),
             )
         bookmarks.sort()
         for v, b in zip(sorted_values, bookmarks):
