@@ -5,6 +5,7 @@ from enum import Enum
 from flask import Flask, request
 
 from utils import opts, version
+from utils.html_utils import html_escape
 from app.app_sections import BookmarkSection
 
 
@@ -76,13 +77,13 @@ class AppAPI:
                         f'value="{bookmark_section.bookmark_id}" />'
 
             html += f'<input type="text" name="section" list="sections" placeholder="Section" ' \
-                    f'size="50" value="{bookmark_section.last_section}"><br>' \
+                    f'size="50" value="{html_escape(bookmark_section.last_section)}"><br>' \
                     f'<input type="text" name="title" placeholder="* Title" ' \
-                    f'size="50" value="{bookmark_section.last_title}"><br>' \
+                    f'size="50" value="{html_escape(bookmark_section.last_title)}"><br>' \
                     f'<input type="text" name="description" placeholder="Description" ' \
-                    f'size="50" value="{bookmark_section.last_description}"><br>' \
+                    f'size="50" value="{html_escape(bookmark_section.last_description)}"><br>' \
                     f'<input type="text" name="url" placeholder="* URL" ' \
-                    f'size="50" value="{bookmark_section.last_url}"><br>' \
+                    f'size="50" value="{html_escape(bookmark_section.last_url)}"><br>' \
                     f'<datalist id="sections">'
             for s in sections:
                 html += f'<option>{s}</option>'
