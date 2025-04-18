@@ -1,12 +1,13 @@
 import base64
 import logging
+import json
 from enum import Enum
 
-from flask import Flask, request
+from flask import Flask, request, redirect, url_for, flash, get_flashed_messages
 
 from utils import opts, version
 from utils.html_utils import html_escape
-from app.app_sections import BookmarkSection
+from app.app_sections import BookmarkSection, StatusSection
 
 
 INC_URL_DEFAULT = "false"
@@ -60,6 +61,7 @@ class AppAPI:
         self.app = app
         self.default_fuzzy_search = default_fuzzy_search
         self.app_api = Flask(__name__)
+        self.app_api.secret_key = 'secretkey'
 
         def _status_to_color(status):
             return "green" if status.success else "red"
@@ -326,7 +328,21 @@ class AppAPI:
             favorites_only = request.args.get("favoritesonly", FAVORITES_ONLY_DEFAULT)
             favorites_only = favorites_only.lower() == "true"
 
-            return _main_page(None, self.app.display_bookmarks(patterns, is_fuzzy, include_url, favorites_only), None)
+            status_section = None
+            status_msg = get_flashed_messages()
+            if status_msg:
+                status_json = json.loads(status_msg[0])
+                status_section = StatusSection(status_json["success"], status_json["msg"])
+
+            return _main_page(status_section, self.app.display_bookmarks(patterns, is_fuzzy, include_url, favorites_only), None)
+
+        def flash_status_and_redirect(status_section):
+            status_json = {
+                "success": status_section.success,
+                "msg": status_section.msg
+            }
+            flash(json.dumps(status_json))
+            return redirect(url_for('index'))
 
         @self.app_api.route(Route.ADD_BOOKMARK.value, methods=["POST"])
         def add_bookmark():
@@ -337,7 +353,11 @@ class AppAPI:
 
             status_section, display_bookmarks_section, bookmark_section = \
                 self.app.add_bookmark(title, description, url, section)
-            return _main_page(status_section, display_bookmarks_section, bookmark_section)
+            if status_section.success:
+                return flash_status_and_redirect(status_section)
+            else:
+                # if request failed, we don't redirect in order to preserve the input fields
+                return _main_page(status_section, display_bookmarks_section, bookmark_section)
 
         def _display_edit_form(title, description, url, section, bookmark_id, status_section):
             bookmark_section = BookmarkSection(title, description, url, section, bookmark_id)
@@ -368,7 +388,8 @@ class AppAPI:
 
             if not status_section.success:
                 return _display_edit_form(title, description, url, section, bookmark_id, status_section)
-            return _main_page(status_section, display_bookmarks_section, bookmark_section)
+
+            return flash_status_and_redirect(status_section)
 
         @self.app_api.route(Route.TOGGLE_FAVORITED.value, methods=["POST"])
         def toggle_facorited():
@@ -380,7 +401,7 @@ class AppAPI:
         def delete_bookmark():
             bookmark_id = request.form.get("bookmark_id")
             status_section, display_section = self.app.delete_bookmark(bookmark_id)
-            return _main_page(status_section, display_section, None)
+            return flash_status_and_redirect(status_section)
 
         @self.app_api.route(Route.IMPORT.value, methods=["GET", "POST"])
         def import_bookmarks():
