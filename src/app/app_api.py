@@ -103,7 +103,6 @@ class AppAPI:
                 Search:
                 <br>
                 <textarea id="searchBookmark" name="searchBookmark" rows="3" cols="30"></textarea><br>
-                <br>
 
                 """ \
                 + fuzzy_checkbox + \
@@ -118,6 +117,10 @@ class AppAPI:
 
                 <br>
 
+                <input type="text" id="searchSection" placeholder="Search section" size="30"><br>
+
+                <br>
+
                 <script type="text/javascript">
                   function searchEvent()
                   {
@@ -125,6 +128,7 @@ class AppAPI:
                     fuzzy = document.getElementById("fuzzy").checked;
                     include_url = document.getElementById("includeurl").checked;
                     favorites_only = document.getElementById("favoritesonly").checked;
+                    section_pattern = document.getElementById("searchSection").value;
 
                     const xhttp = new XMLHttpRequest();
                     xhttp.onload = function() {
@@ -139,13 +143,15 @@ class AppAPI:
                     xhttp.open("GET", "/bookmarks?pattern=" + btoa(patterns) +
                       "&fuzzy=" + fuzzy +
                       "&includeurl=" + include_url +
-                      "&favoritesonly=" + favorites_only);
+                      "&favoritesonly=" + favorites_only +
+                      "&sectionPattern=" + btoa(section_pattern));
                     xhttp.send();
                   }
 
                   fuzzy.addEventListener("input", searchEvent);
                   includeurl.addEventListener("input", searchEvent);
                   favoritesonly.addEventListener("input", searchEvent);
+                  searchSection.addEventListener("input", searchEvent);
                   searchBookmark.addEventListener("input", searchEvent);
 
                   window.onkeydown = function(e) {
@@ -157,6 +163,7 @@ class AppAPI:
                     // ESC - reset search
                     else if (e.key === "Escape") {
                       document.getElementById("searchBookmark").value = '';
+                      document.getElementById("searchSection").value = '';
                       searchEvent()
                     }
                   }
@@ -314,7 +321,13 @@ class AppAPI:
             favorites_only = request.args.get("favoritesonly", FAVORITES_ONLY_DEFAULT)
             favorites_only = favorites_only.lower() == "true"
 
-            return _bookmarks_section(self.app.display_bookmarks(patterns, is_fuzzy, include_url, favorites_only))
+            section_pattern = request.args.get("sectionPattern", "")
+            if section_pattern:
+                section_pattern = base64.b64decode(section_pattern).decode('utf-8')
+            else:
+                section_pattern = None
+
+            return _bookmarks_section(self.app.display_bookmarks(patterns, is_fuzzy, include_url, favorites_only, section_pattern))
 
         @self.app_api.route(Route.INDEX.value)
         def index():
@@ -327,6 +340,7 @@ class AppAPI:
             include_url = include_url.lower() == "true"
             favorites_only = request.args.get("favoritesonly", FAVORITES_ONLY_DEFAULT)
             favorites_only = favorites_only.lower() == "true"
+            section_pattern = request.args.get("sectionPattern", None)
 
             status_section = None
             status_msg = get_flashed_messages()
@@ -334,7 +348,7 @@ class AppAPI:
                 status_json = json.loads(status_msg[0])
                 status_section = StatusSection(status_json["success"], status_json["msg"])
 
-            return _main_page(status_section, self.app.display_bookmarks(patterns, is_fuzzy, include_url, favorites_only), None)
+            return _main_page(status_section, self.app.display_bookmarks(patterns, is_fuzzy, include_url, favorites_only, section_pattern), None)
 
         def flash_status_and_redirect(status_section):
             status_json = {

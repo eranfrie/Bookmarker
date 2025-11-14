@@ -80,3 +80,19 @@ class Bookmark:
         return search_method(pattern, self.title_lower) is not None \
             or search_method(pattern, self.description_lower) is not None \
             or (search_method(pattern, self.url_lower) is not None and include_url)
+
+    def match_section(self, section_pattern):
+        """
+        Check if bookmark's section matches the section pattern (exact match).
+
+        Assumes section_pattern is lowercased.
+
+        Args:
+            section_pattern (str): section pattern to match against (lowercased)
+
+        Returns:
+            bool: True if bookmark's section matches the pattern, False otherwise
+        """
+        if not section_pattern:
+            return True
+        return self.section_lower == section_pattern

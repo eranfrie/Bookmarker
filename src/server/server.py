@@ -45,11 +45,15 @@ class Server:
         self._cache = bookmarks
         return self._cache
 
-    def get_bookmarks(self, patterns, is_fuzzy, include_url, favorites_only):
+    def get_bookmarks(self, patterns, is_fuzzy, include_url, favorites_only, section_pattern=None):
         bookmarks = self._get_all_bookmarks()
 
         if favorites_only:
             bookmarks = [b for b in bookmarks if b.is_favorited]
+
+        if section_pattern:
+            section_pattern = section_pattern.lower().strip()
+            bookmarks = [b for b in bookmarks if b.match_section(section_pattern)]
 
         if not patterns:
             return bookmarks
