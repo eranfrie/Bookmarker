@@ -102,7 +102,8 @@ class AppAPI:
                 <br>
                 Search:
                 <br>
-                <textarea id="searchBookmark" name="searchBookmark" rows="3" cols="30"></textarea><br>
+                <input type="text" id="searchBookmark" placeholder="Search bookmark" size="30" style="padding: 8px; font-size: 14px;"><br><br>
+                <div id="searchTagsContainer" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; min-height: 32px; align-items: flex-start;"></div>
 
                 """ \
                 + fuzzy_checkbox + \
@@ -122,9 +123,42 @@ class AppAPI:
                 <br>
 
                 <script type="text/javascript">
+                  let searchTerms = [];
+
+                  function renderSearchTags() {
+                    const container = document.getElementById("searchTagsContainer");
+                    container.innerHTML = "";
+
+                    searchTerms.forEach((term, index) => {
+                      const tag = document.createElement("div");
+                      tag.style.cssText = "display: flex; align-items: center; gap: 6px; background-color: #e0e0e0; padding: 6px 10px; border-radius: 20px; font-size: 14px; max-width: 300px;";
+
+                      const text = document.createElement("span");
+                      text.textContent = term;
+                      text.style.cssText = "overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
+
+                      const removeBtn = document.createElement("button");
+                      removeBtn.textContent = "×";
+                      removeBtn.style.cssText = "background: none; border: none; font-size: 18px; cursor: pointer; padding: 0; color: #666; font-weight: bold; line-height: 1;";
+                      removeBtn.onclick = (e) => {
+                        e.preventDefault();
+                        searchTerms.splice(index, 1);
+                        renderSearchTags();
+                        searchEvent();
+                      };
+
+                      tag.appendChild(text);
+                      tag.appendChild(removeBtn);
+                      container.appendChild(tag);
+                    });
+                  }
+
                   function searchEvent()
                   {
-                    patterns = document.getElementById("searchBookmark").value;
+                    terms = searchTerms.slice();
+                    terms.push(document.getElementById("searchBookmark").value);
+                    patterns = terms.join("\\n");
+
                     fuzzy = document.getElementById("fuzzy").checked;
                     include_url = document.getElementById("includeurl").checked;
                     favorites_only = document.getElementById("favoritesonly").checked;
@@ -148,6 +182,19 @@ class AppAPI:
                     xhttp.send();
                   }
 
+                  document.getElementById("searchBookmark").addEventListener("keydown", function(e) {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const term = this.value.trim();
+                      if (term) {
+                        searchTerms.push(term);
+                        this.value = "";
+                        renderSearchTags();
+                        searchEvent();
+                      }
+                    }
+                  });
+
                   fuzzy.addEventListener("input", searchEvent);
                   includeurl.addEventListener("input", searchEvent);
                   favoritesonly.addEventListener("input", searchEvent);
@@ -162,11 +209,15 @@ class AppAPI:
                     }
                     // ESC - reset search
                     else if (e.key === "Escape") {
+                      searchTerms = [];
                       document.getElementById("searchBookmark").value = '';
                       document.getElementById("searchSection").value = '';
+                      renderSearchTags();
                       searchEvent()
                     }
                   }
+
+                  renderSearchTags();
                 </script>
             """
 
